@@ -1,0 +1,6 @@
+# Here goes your custom configuration
+SSID="iot_testbed"
+PASSPHRASE="changethispassword"
+HW_MODE=g
+CHANNEL=1
+root:changethispasswordplease

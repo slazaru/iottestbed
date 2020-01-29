@@ -1,0 +1,112 @@
+# Use phusion/baseimage as base image. To make your builds
+# reproducible, make sure you lock down to a specific version, not
+# to `latest`! See
+# https://github.com/phusion/baseimage-docker/blob/master/Changelog.md
+# for a list of version numbers.
+FROM ubuntu:18.04
+MAINTAINER s.lazarus@unsw.edu.au
+
+# non-interactive when installing packages
+ENV DEBIAN_FRONTEND noninteractive
+# Update the repos
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install apt-utils -y
+RUN apt-get update -y && apt-get install -y locales && locale-gen en_US.UTF-8
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+
+RUN apt-get install -y hostapd dnsmasq tcpdump nano  
+RUN echo "#!/bin/bash\n### START dnsmasq\nservice dnsmasq start > /dev/null 2>&1\n### START hostapd\nservice hostapd start > /dev/null 2>&1" > /usr/bin/start_ap
+RUN echo "RUN_DAEMON=\"yes\"\nDAEMON_CONF=\"/etc/hostapd/hostapd.conf\"" >> /etc/default/hostapd
+RUN chmod u+x /usr/bin/start_ap
+
+# Jan 2020
+RUN apt-get install net-tools -y
+RUN apt-get install iptables -y
+RUN apt-get install nginx -y
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN service nginx restart
+RUN mkdir /root/iptables_scripts
+COPY iptables_scripts/client_only.sh /root/iptables_scripts/client_only.sh
+COPY iptables_scripts/allow_all.sh /root/iptables_scripts/allow_all.sh
+COPY iptables_scripts/no_outbound.sh /root/iptables_scripts/no_outbound.sh
+COPY iptables_scripts/ssh_only.sh /root/iptables_scripts/ssh_only.sh
+RUN apt-get install python3-dev -y
+RUN apt-get install python3-pip -y
+RUN apt-get install python -y
+RUN apt-get install python-pip -y
+RUN pip3 install watchdog
+RUN apt-get install libatlas-base-dev -y
+RUN apt-get install libopenjp2-7 -y
+RUN apt-get install python3-tk -y
+RUN apt-get install tshark -y
+RUN pip3 install scapy
+RUN pip3 install wordcloud
+RUN pip3 install networkx
+RUN apt-get install git -y
+RUN apt-get install graphviz -y
+RUN apt-get install -y graphviz-dev
+RUN git clone https://github.com/fubar2/pcapGrok.git /root/pcapGrok && cd /root/pcapGrok && git checkout ae6368a606aef65ad1aeef826e0e2c32607ac4a9 && pip3 install -r requirements.txt
+RUN apt-get install wget -y
+RUN wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb
+RUN apt-get install graphviz libgraphviz-dev pkg-config -y
+RUN apt-get install nmap -y
+# TODO vulners script
+RUN apt-get install -y python-pycurl
+RUN pip install wfuzz
+RUN git clone https://github.com/ShawnDEvans/smbmap.git /root/smbmap && cd /root/smbmap && pip3 install -r requirements.txt
+RUN ln -s /root/smbmap/smbmap.py /usr/local/bin # smbmap.py any context
+RUN apt-get install smbclient -y
+RUN apt-get install sslscan -y
+RUN apt-get install iputils-ping -y
+RUN wget https://raw.githubusercontent.com/pwnieexpress/pwn_plug_sources/master/src/snmpcheck/snmpcheck-1.8.pl -O /root/snmpcheck-1.8.pl && chmod +x /root/snmpcheck-1.8.pl && ln -s /root/snmpcheck-1.8.pl /usr/local/bin
+RUN apt-get install perl -y
+RUN perl -MCPAN -e 'install Net::SNMP'
+RUN perl -MCPAN -e 'install Crypt::CBC'
+RUN perl -MCPAN -e 'install Number::Bytes::Human'
+RUN pip install pysnmp && wget https://raw.githubusercontent.com/curesec/tools/master/snmp/snmp-walk.py -O /root/snmp-walk.py && chmod +x /root/snmp-walk.py && ln -s /root/snmp-walk.py /usr/local/bin
+RUN apt-get install nikto -y
+RUN apt-get install libwww-perl -y
+RUN git clone https://github.com/rezasp/joomscan.git /root/joomscan && chmod +x /root/joomscan/joomscan.pl && ln -s /root/joomscan/joomscan.pl /usr/local/bin
+RUN sed -i "1s/.*/\#\!\/usr\/bin\/perl\ \-\-/" /root/joomscan/joomscan.pl
+RUN apt-get install gem -y
+RUN apt-get install rubygems -y
+RUN apt-get install ruby-dev -y
+RUN apt-get install zlib1g-dev -y
+RUN apt-get install libcurl4-gnutls-dev -y
+RUN gem install wpscan
+RUN pip3 install droopescan
+RUN git clone https://github.com/portcullislabs/enum4linux.git /root/enum4linux
+RUN ln -s /root/enun4linux /usr/local/bin
+RUN apt-get install hydra -y
+RUN pip install netaddr
+RUN pip install dnspython
+RUN apt-get install python-lxml -y
+RUN git clone https://github.com/darkoperator/dnsrecon.git /root/dnsrecon
+RUN cp /root/dnsrecon/dnsrecon.py /root/dnsrecon/dnsrecon
+RUN chmod +x /root/dnsrecon/dnsrecon
+RUN echo 'deb http://download.opensuse.org/repositories/security:/zeek/xUbuntu_18.04/ /' > /etc/apt/sources.list.d/security:zeek.list
+RUN wget -O- - https://download.opensuse.org/repositories/security:zeek/xUbuntu_18.04/Release.key | apt-key add -
+RUN apt-get update -y
+RUN apt-get install zeek -y
+# may need to change node.cfg
+# nano /opt/zeek/etc/node.cfg
+RUN /opt/zeek/bin/zeekctl install
+RUN /opt/zeek/bin/zeekctl deploy
+RUN /opt/zeek/bin/zeekctl start
+RUN apt-get install openssh-server -y
+RUN mkdir /var/run/sshd
+RUN echo 'root:test_test_test' | chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
+RUN sed -i 's/#Port 22/Port 54444/g' /etc/ssh/sshd_config
+#sed -i 's/#Port 22/Port 22/g' /etc/ssh/sshd_config
+#RUN echo "export VISIBLE=now" >> /etc/profile
+COPY wlan_config.txt /wlan_config.txt
+RUN cat wlan_config.txt | grep root| chpasswd
+#CMD ["/etc/init.d/ssh","restart"]
+
+# Clean up APT when done.
+#RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENTRYPOINT /etc/init.d/ssh restart && /bin/bash
+
