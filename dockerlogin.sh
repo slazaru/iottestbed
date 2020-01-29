@@ -1,0 +1,4 @@
+docker login --username=fubar
+
+
+
