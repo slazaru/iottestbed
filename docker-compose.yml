@@ -1,0 +1,23 @@
+# docker-compose.yml
+
+version: "3.2"
+services:
+    python-service:
+        build: ./python-service
+        # 'rabbitmq-server' will be available as a network reference inside this service 
+        # and this service will start only after the RabbitMQ service does.
+        # Keep it running.  
+        tty: true
+        # Map port 3000 on the host machine to port 3000 of the container.
+        # This will be used to receive HTTP requests made to the service.
+        ports:
+            - "3000:3000"
+        volumes:
+            - './python-service:/python-service'
+
+
+# Host volumes used to store code.
+volumes:
+    python-service:
+
+
