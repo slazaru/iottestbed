@@ -31,20 +31,19 @@ RUN apt-get install -y net-tools iptables nginx python3-dev perl libwww-perl nik
  smbclient sslscan iputils-ping gem rubygems ruby-dev zlib1g-dev libcurl4-gnutls-dev && \
  perl -MCPAN -e 'install Net::SNMP' && perl -MCPAN -e 'install Crypt::CBC' && perl -MCPAN -e 'install Number::Bytes::Human' && \
  gem install wpscan && pip3 install droopescan && \
- git clone https://github.com/portcullislabs/enum4linux.git /root/enum4linux && ln -s /root/enun4linux /usr/local/bin
+ git clone https://github.com/portcullislabs/enum4linux.git /root/enum4linux && ln -s /root/enum4linux/enum4linux.pl /usr/local/bin
 
 FROM ubu as ubu2
 RUN pip3 install netaddr && pip3 install dnspython &&  pip3 install pysnmp && \
  git clone https://github.com/darkoperator/dnsrecon.git /root/dnsrecon && \
  cp /root/dnsrecon/dnsrecon.py /root/dnsrecon/dnsrecon && \
- chmod +x /root/dnsrecon/dnsrecon  
+ chmod +x /root/dnsrecon/dnsrecon && ln -s /root/dnsrecon/dnsrecon /usr/local/bin
 
 # prepare for ssh
 RUN mkdir -p /var/run/sshd && \
  sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
  sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
  sed -i 's/#Port 22/Port 54444/g' /etc/ssh/sshd_config && \
- echo "export VISIBLE=now" >> /etc/profile && \
  mkdir /root/iptables_scripts
 
 # copy some scripts we need later 
@@ -66,13 +65,22 @@ RUN cat wlan_config.txt | grep root| chpasswd  && \
  chmod  +x /root/snmpcheck-1.8.pl && ln -s /root/snmpcheck-1.8.pl /usr/local/bin && \
  pip install pysnmp && wget https://raw.githubusercontent.com/curesec/tools/master/snmp/snmp-walk.py -O /root/snmp-walk.py && chmod +x /root/snmp-walk.py && ln -s /root/snmp-walk.py /usr/local/bin && \
  git clone https://github.com/rezasp/joomscan.git /root/joomscan && chmod +x /root/joomscan/joomscan.pl && ln -s /root/joomscan/joomscan.pl /usr/local/bin && \
- sed -i "1s/.*/\#\!\/usr\/bin\/perl\ \-\-/" /root/joomscan/joomscan.pl
+ sed -i "1s/.*/\#\!\/usr\/bin\/perl\ \-\-/" /root/joomscan/joomscan.pl && \
+ rm /var/www/html/index.nginx-debian.html && \
+ pip install shodan
 
+# may need to change node.cfg nano /opt/zeek/etc/node.cfg docker interface might not be same as default
 RUN /opt/zeek/bin/zeekctl install && /opt/zeek/bin/zeekctl deploy && /opt/zeek/bin/zeekctl start
+
+# set up secur_iot tools
+RUN git clone https://github.com/slazaru/secur_IOT.git /root/secur_IOT && \
+ mkdir -p /usr/share/wordlists && \
+ cp /root/secur_IOT/common.txt /usr/share/wordlists/common.txt && \
+ cp /root/secur_IOT/extensions.txt /usr/share/wordlists/extensions.txt && \
+ cp /root/secur_IOT/sshPasswords1.txt /usr/share/wordlists/sshPasswords1.txt && \
+ cp /root/secur_IOT/sshUsers1.txt /usr/share/wordlists/sshUsers1.txt 
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#CMD ["/etc/init.d/ssh","restart"]
-ENTRYPOINT /etc/init.d/ssh restart && /bin/bash
-
+ENTRYPOINT /etc/init.d/ssh restart && service nginx restart && /bin/bash
