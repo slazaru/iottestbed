@@ -33,10 +33,7 @@ pushd "$(dirname "$0")" > /dev/null
 PATHSCRIPT=$(pwd)
 popd > /dev/null
 
-if [ "$ARCH" == "armv7l" ]
-then
-    DOCKER_IMAGE="armhf-iot_testbed"
-elif [ "$ARCH" == "x86_64" ]
+if [ "$ARCH" == "x86_64" ]
 then
     DOCKER_IMAGE="iot_testbed"
 else
@@ -74,7 +71,8 @@ print_banner () {
 
 init () {
     IFACE="$1"
-    
+    # zeek needs this later
+    echo $IFACE > "$PATHSCRIPT"/device
     # Check that the requested iface is available
     if ! [ -e /sys/class/net/"$IFACE" ]
     then
@@ -116,12 +114,9 @@ init () {
         echo -e "${BLUE}[INFO]${NC} Docker image ${RED}$DOCKER_IMAGE${NC} not found"
         # Option 1: Building
         echo -e "[+] Building the image ${GREEN}$DOCKER_IMAGE${NC} (Grab a coffee...)"
-        if [ "$ARCH" == "armv7l" ]
+        if [ "$ARCH" == "x86_64" ]
         then
-            docker build --rm -t $DOCKER_IMAGE -f "$PATHSCRIPT"/build/Dockerfile_armv7 .
-        elif [ "$ARCH" == "x86_64" ]
-        then
-            docker build --rm -t $DOCKER_IMAGE -f "$PATHSCRIPT"/build/Dockerfile_x86_64 .
+            docker build --rm -t $DOCKER_IMAGE -f "$PATHSCRIPT"/Dockerfile .
         fi
     fi
 

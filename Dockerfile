@@ -4,8 +4,6 @@
 FROM ubuntu:18.04 as ubu
 MAINTAINER s.lazarus@unsw.edu.au
 
-
-
 # non-interactive when installing packages
 ENV DEBIAN_FRONTEND noninteractive
 # add what's needed to get the repo key and repo for zeek
@@ -79,6 +77,13 @@ RUN git clone https://github.com/slazaru/secur_IOT.git /root/secur_IOT && \
  cp /root/secur_IOT/extensions.txt /usr/share/wordlists/extensions.txt && \
  cp /root/secur_IOT/sshPasswords1.txt /usr/share/wordlists/sshPasswords1.txt && \
  cp /root/secur_IOT/sshUsers1.txt /usr/share/wordlists/sshUsers1.txt 
+
+# current
+COPY /device /root/device
+RUN apt-get install iw -y && \
+ sed "s/eth0/$(cat /root/device)/g" -i /opt/zeek/etc/node.cfg  && \
+ ln -s /root/secur_IOT/pcapreporter.py /usr/local/sbin && \
+ chmod +x /root/secur_IOT/pcapreporter.py
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -1,2 +1,2 @@
-docker build --rm -t iot_testbed -f Dockerfile .
+docker build --rm=false -t iot_testbed -f Dockerfile .
 
