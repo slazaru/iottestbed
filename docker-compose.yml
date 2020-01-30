@@ -1,23 +1,70 @@
 # docker-compose.yml
+# wierd things happen with indentation issues
 
 version: "3.2"
+
 services:
-    python-service:
-        build: ./python-service
-        # 'rabbitmq-server' will be available as a network reference inside this service 
-        # and this service will start only after the RabbitMQ service does.
-        # Keep it running.  
+    wireless:
+        build: 
+           ./wireless
+        network_mode: "host"
+        environment:
+            - INTERFACE=wlp2s0
+            - DEBUG="1"
+        privileged: true
         tty: true
-        # Map port 3000 on the host machine to port 3000 of the container.
-        # This will be used to receive HTTP requests made to the service.
-        ports:
-            - "3000:3000"
+        volumes: 
+            - "./wireless:/wireless"
+           
+    describe:
+        build: ./describe
+        tty: true
         volumes:
-            - './python-service:/python-service'
+            - ./describe:/describe
+        networks:
+            - workbench
+    netmon:
+        build: ./netmon
+        tty: true
+        volumes:
+            - ./netmon:/netmon
+        networks:
+           - workbench
+         
+networks:
+        workbench:
+        netmon:
+        
+#networks: # found at https://github.com/mnagaku/wifi/blob/master/docker-compose.yml
 
+  #wifi:
+    #driver: bridge
+    #driver_opts:
+      #com.docker.network.bridge.enable_icc: "true"
+      #com.docker.network.bridge.enable_ip_masquerade: "false"
+      #com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+      #com.docker.network.bridge.name: "br14"
+      #com.docker.network.driver.mtu: "1500"
+    #ipam:
+      #driver: default
+      #config:
+        #- subnet: 192.168.14.0/24
+        ## gateway: 192.168.14.1
 
-# Host volumes used to store code.
-volumes:
-    python-service:
+  #wire:
+    #driver: bridge
+    #driver_opts:
+      #com.docker.network.bridge.enable_icc: "true"
+      #com.docker.network.bridge.enable_ip_masquerade: "false"
+      #com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+      #com.docker.network.bridge.name: "br19"
+      #com.docker.network.driver.mtu: "1500"
+    #ipam:
+      #driver: default
+      #config:
+        #- subnet: 192.168.19.0/24
+        ## gateway: 192.168.14.1
 
-
+  #wlp2s0:
+    #external:
+      #name: wlp2s0
