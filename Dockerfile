@@ -55,7 +55,7 @@ COPY iptables_scripts/ssh_only.sh /root/iptables_scripts/ssh_only.sh
 # some late additions
 RUN cat wlan_config.txt | grep root| chpasswd  && \
  service nginx restart && pip3 install watchdog && pip3 install wordcloud && pip3 install networkx && \
- git clone https://github.com/fubar2/pcapGrok.git /root/pcapGrok && cd /root/pcapGrok && git checkout ae6368a606aef65ad1aeef826e0e2c32607ac4a9 && pip3 install -r requirements.txt && \
+ git clone https://github.com/fubar2/pcapGrok.git /root/pcapGrok && cd /root/pcapGrok && pip3 install -r requirements.txt && \
  wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb && \
  pip install wfuzz && git clone https://github.com/ShawnDEvans/smbmap.git /root/smbmap && cd /root/smbmap && pip3 install -r requirements.txt && \
  ln -s /root/smbmap/smbmap.py /usr/local/bin && \
@@ -83,7 +83,9 @@ COPY /device /root/device
 RUN apt-get install iw -y && \
  sed "s/eth0/$(cat /root/device)/g" -i /opt/zeek/etc/node.cfg  && \
  ln -s /root/secur_IOT/pcapreporter.py /usr/local/sbin && \
- chmod +x /root/secur_IOT/pcapreporter.py
+ chmod +x /root/secur_IOT/pcapreporter.py && \
+ apt-get install -y poppler-utils && \
+ cp /root/secur_IOT/bootstrap.min.css /var/www/html/
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
