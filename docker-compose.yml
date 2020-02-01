@@ -21,19 +21,32 @@ services:
         tty: true
         volumes:
             - ./describe:/describe
-        networks:
-            - workbench
+        ports:
+            - 3000:3000
+        #networks:
+            #- workbench
     netmon:
         build: ./netmon
+        
         tty: true
         volumes:
             - ./netmon:/netmon
-        networks:
-           - workbench
+        container_name: netmon
+        ports:
+            - 8080:8080
+        # for websnort
+        #command: sh -c "service rsyslog restart && /usr/local/bin/snort -c /home/snort/etc/snort.conf -i eth1"
+        #volumes:
+        #   - /opt/snortrules-snapshot-back:/home/snort
+        cap_add:
+            - NET_ADMIN
+        restart: always            
+        #networks:
+           #- workbench
          
-networks:
-        workbench:
-        netmon:
+#networks:
+        #workbench:
+        #netmon:
         
 #networks: # found at https://github.com/mnagaku/wifi/blob/master/docker-compose.yml
 
