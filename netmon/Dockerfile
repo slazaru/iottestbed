@@ -7,7 +7,7 @@ FROM ubuntu:18.04 as ubu
 ## Env
 ENV DEBIAN_FRONTEND noninteractive
 
-# add what's needed to get the repo key and repo for zeek
+# add what's needed to get the repo key and repo for zeek - need to clean this up - mostly not needed
 RUN apt-get update && apt-get upgrade -y && apt-get install apt-utils locales gnupg2 ca-certificates apt-transport-https wget -y && \
 	apt-get -y install \
     wget \
@@ -16,22 +16,10 @@ RUN apt-get update && apt-get upgrade -y && apt-get install apt-utils locales gn
     libtool \
     automake \
     gcc \
-    flex \
-    bison \
-    libnet1 \
-    libnet1-dev \
-    pkg-config \
-    libpcre3 \
-    libpcre3-dev \
-    autoconf \
-    libcrypt-ssleay-perl \
-    libwww-perl \
-    git \
     zlib1g \
     zlib1g-dev \
     libssl-dev \
     libmysqlclient-dev \
-    imagemagick \
     wkhtmltopdf \
     libyaml-dev \
     libxml2-dev \
@@ -48,10 +36,6 @@ RUN apt-get update && apt-get upgrade -y && apt-get install apt-utils locales gn
     gettext-base \
     libdumbnet-dev \
     libpcap-dev \
-    luajit \
-    libluajit-5.1-2 \
-    libluajit-5.1-dev \
-    libluajit-5.1-common \
     python3-pip nano \
     python-pip && \
     locale-gen en_US.UTF-8
@@ -62,8 +46,7 @@ RUN wget -O- - https://download.opensuse.org/repositories/security:zeek/xUbuntu_
 # may need to change node.cfg nano /opt/zeek/etc/node.cfg docker interface might not be same as default
 
 # RUN apt-get clean && rm -rf /var/cache/apt/*
-EXPOSE 8080
-CMD ["websnort"]
+
 
 
 

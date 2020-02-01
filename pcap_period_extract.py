@@ -19,11 +19,12 @@ from datetime import datetime
 import dateutil
 from scapy.all import *
 import bisect
+import pathlib
 
 
 class pcapStore():
 	""" find all subdirs and read within a time window
-	# - use tcpdump -i en0 -w "testbed_%Y-%m-%d-%H:%M:%S.pcap" -W 3 -G 300 -z gzip
+	# - use tcpdump -i en0 -w "testbed_%Y-%m-%d-%H:%M:%S.pcap" -G 3600 -z gzip
 	"""
 	
 	def __init__(self,pcapsFolder):
