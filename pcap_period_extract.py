@@ -29,6 +29,8 @@ class pcapStore():
 	
 	def __init__(self,pcapsFolder):
 		self.pcapsFolder = pcapsFolder
+		
+	def getUptodate(self)
 		plist = os.listdir(pcapsFolder)
 		pcapfnames = []
 		pcaptds = [] # date time started
@@ -38,7 +40,7 @@ class pcapStore():
 				flist =  os.listdir(pfn)
 				tds = []
 				for fname in flist: 
-					fs = fname.split('_')
+					fs = fname.split('_') # assume name works this way...
 					if len(fs) == 2:
 						fstartdate = fs[1]
 						fsdt = datetime.strptime(fstartdate,'%Y-%m-%d-%H:%M:%S')
@@ -53,13 +55,18 @@ class pcapStore():
 	def getPeriod(sdt,edt,pcapdest):
 		"""put all packets found between the two dates into the pcapdest filename
 		"""
+		self.getUptodate() # in case any new ones since we started running
 		respcap = []
-		enddt = edt.strftime('%Y-%m-%d-%H:%M:%S')
-		startdt = sdt.strftime('%Y-%m-%d-%H:%M:%S')
+		try:
+			enddt = edt.strftime('%Y-%m-%d-%H:%M:%S')
+			startdt = sdt.strftime('%Y-%m-%d-%H:%M:%S')
+		except:
+			logging.debug('## Datetime conversion problem with start and end dates given - %s and %s' % (sdt,edt))
+			return None
 		firstfi = bisect.bisectl(self.pcapdts,startdt)
 		lastfi = bisect.bisect(self.pcapdts,enddt)
 		for fnum in firsfi to lastfi:
 			rdfname = os.path.join(self.pcapsFolder,pcapfnames[fnum])
 			pin = rdpcap(rdfname)
-			respcap += pin
-		return respcap  # removes dupes
+			respcap.append(pin)
+		return ''.join(respcap)  

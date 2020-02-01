@@ -111,5 +111,7 @@ dhcpd ${INTERFACE}
 
 echo "Starting HostAP daemon ..."
 /usr/sbin/hostapd /etc/hostapd.conf 
+echo "starting TCP dump ..."
+tcpdump -i $INTERFACE -w "/pcaps/filedrop/testbed_%Y-%m-%d-%H:%M:%S.pcap" -G 3600 &
 
 
