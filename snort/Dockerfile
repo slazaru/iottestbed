@@ -1,7 +1,7 @@
 # Docker build for IoT testbed snort
 # got it working so might as well use it
 # january 28 2020
-
+# derived from https://github.com/patrickneise/snort.git
 
 FROM alpine:3.6
 

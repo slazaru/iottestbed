@@ -20,53 +20,73 @@ import dateutil
 from scapy.all import *
 import bisect
 import pathlib
+import logging
 
+FSDTFORMAT = '%Y-%m-%d-%H:%M:%S'
 
 class pcapStore():
 	""" find all subdirs and read within a time window
-	# - use tcpdump -i en0 -w "testbed_%Y-%m-%d-%H:%M:%S.pcap" -G 3600 -z gzip
+		# - use  (eg) tcpdump -i en0 -w "testbed_%Y-%m-%d-%H:%M:%S.pcap" -G 3600 
+		The underscore allows easy trimming of the file name prefix part
 	"""
 	
 	def __init__(self,pcapsFolder):
 		self.pcapsFolder = pcapsFolder
+		self.pcapfnames = []
+		self.pcaptds = []
 		
-	def getUptodate(self)
-		plist = os.listdir(pcapsFolder)
+		
+	def readFolder(self)
+		""" 
+		index complex folders of pcaps on start date
+		using fugly metadata in filename so a time window 
+		of packets can be extracted
+		"""
 		pcapfnames = []
 		pcaptds = [] # date time started
-		for pfn in plist:
-			ppath = os.path.join(pcapsFolder, pfn)
-			if os.path.isdir(ppath):
-				flist =  os.listdir(pfn)
-				tds = []
-				for fname in flist: 
-					fs = fname.split('_') # assume name works this way...
-					if len(fs) == 2:
-						fstartdate = fs[1]
-						fsdt = datetime.strptime(fstartdate,'%Y-%m-%d-%H:%M:%S')
-						pcapdts.append(fsdt)
-						pcapfnames.append(fname)
-					else:
-						logging.debug('Got pcap file name %s - expected something else...ignoring' % fname)
+		for dirName, subdirList, fileList in os.walk(self.pcapsFolder):
+			for pfn in fileList:
+				fs = pfn.split('_') # assume name works this way...
+				if len(fs) == 2:
+					fn = fs[1] 
+					ppath = os.path.join(dirName, fn)
+					fstartdate = os.path.basename(fn) # date
+					try:
+						fsdt = datetime.strptime(fstartdate,FSDTFORMAT)
+						fsdtt = time.mktime(fsdt.timetuple())
+						pcapdts.append(int(fsdtt)) # easier for bisect to work on - assume never > 1/sec FFS!
+						pcapfnames.append(ppath)
+					except:
+						logging.debug('Found pcap file name %s in path %s - expected something else...ignoring' % (pfn,self.pcapsFolder))
 		self.pcapfnames = pcapfnames
 		self.pcaptds = pcaptds
 		
 		
-	def getPeriod(sdt,edt,pcapdest):
-		"""put all packets found between the two dates into the pcapdest filename
+	def writePeriod(sdt,edt,pcapdest):
+		"""write packets in a datetime window into pcapdest as pcap
 		"""
-		self.getUptodate() # in case any new ones since we started running
+		self.readFolder() # in case any new ones since we started running
 		respcap = []
+		edtt = time.mktime(edt.timetuple()) # as seconds since epoch
+		sdtt = time.mktime(sdt.timetuple())
 		try:
 			enddt = edt.strftime('%Y-%m-%d-%H:%M:%S')
 			startdt = sdt.strftime('%Y-%m-%d-%H:%M:%S')
 		except:
-			logging.debug('## Datetime conversion problem with start and end dates given - %s and %s' % (sdt,edt))
-			return None
-		firstfi = bisect.bisectl(self.pcapdts,startdt)
-		lastfi = bisect.bisect(self.pcapdts,enddt)
+			logging.debug('##Problem with start and end datetimes in writePeriod - %s and %s - expected datetimes' % (sdt,edt))
+			return False
+		firstfi = bisect.bisect(self.pcapdts,sdtt)
+		lastfi = bisect.bisect_right(self.pcapdts,edtt)
+		acted = False
 		for fnum in firsfi to lastfi:
-			rdfname = os.path.join(self.pcapsFolder,pcapfnames[fnum])
+			rdfname = pcapfnames[fnum]
 			pin = rdpcap(rdfname)
-			respcap.append(pin)
-		return ''.join(respcap)  
+			pin = [x for x in pin if x.time <= edtt and x.time >= sdtt] # gotta love scapy 
+			if len(pin) > 0:
+				wrpcap(pcapdest, pin, append=True) #appends packets to output file
+				acted = True
+			else:
+				logging.debug('writePeriod got zero packets filtering by start %d end %d on pcal %s' % (sdtt,edtt,rdfname))
+		if acted:
+			logging.info('writePeriod filtered from %d packet files using window %s - %s to %s' % (lastfi-firstfi+1,startdt,enddt,pcapdest))
+		return acted

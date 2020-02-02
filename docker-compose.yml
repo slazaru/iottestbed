@@ -41,7 +41,7 @@ services:
         volumes: 
             - "/testbed/pcaps:/pcaps"
 
-        # restart: always
+        restart: always
         
            
     describe:
@@ -51,17 +51,17 @@ services:
             - "/testbed/pcaps:/pcaps"
             - "/testbed/reports:/reports"
         ports:
-            - 3000:3000
+            - "3000:3000"
         environment:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
-        #depends_on:
-        #   - redis
-        #restart: always
-        #links:
-        #    - redis
+        depends_on:
+           - redis
+        restart: always
+        links:
+           - redis
 
     snort:
         image: snort
