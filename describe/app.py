@@ -7,8 +7,8 @@ logging.basicConfig(filename='flask.log',level=logging.INFO)
 
 app = Flask(__name__)
 
-attack_exe = 'python3 describe.py'
-describe_exe = 'python3 describe.py'
+attack_exe = 'python3 /reports/flaskapp/describe.py'
+describe_exe = 'python3 /reports/flaskapp/describe.py'
 
 """
 to send:

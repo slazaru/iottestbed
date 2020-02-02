@@ -40,11 +40,8 @@ services:
         tty: true
         volumes: 
             - "/testbed/pcaps:/pcaps"
-        depends_on:
-            - redis
-        restart: always
-        links:
-            - redis
+
+        # restart: always
         
            
     describe:
@@ -60,11 +57,11 @@ services:
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
-        depends_on:
-            - redis
-        restart: always
-        links:
-            - redis
+        #depends_on:
+        #   - redis
+        #restart: always
+        #links:
+        #    - redis
 
     snort:
         image: snort
@@ -80,14 +77,14 @@ services:
         volumes:
             - "/testbed/pcaps:/pcaps"
         depends_on:
-            - redis
+            - redis 
         restart: always
         links:
             - redis
 
     pentest:
         image: pentest
-        network_mode: "host"
+        # network_mode: "host"
         environment:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
@@ -96,7 +93,7 @@ services:
         volumes:
             - "/testbed/reports:/reports"
         depends_on:
-            - redis
+            - redis 
         restart: always
         links:
             - redis

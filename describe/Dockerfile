@@ -25,8 +25,9 @@ RUN wget -O- https://download.opensuse.org/repositories/security:zeek/xUbuntu_18
 COPY requirements.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY app.py /reports/flaskapp
-RUN chmod ugo+x /reports/flaskapp/app.py
+COPY ./app.py /reports/flaskapp/
+copy ./describe.py /reports/flaskapp/
+RUN chmod ug+rx /reports/flaskapp/app.py && chmod ug+rx /reports/flaskapp/describe.py
 
 RUN mkdir -p /usr/share/GeoIP
 
@@ -35,10 +36,11 @@ RUN apt-get install -y git poppler-utils && pip3 install watchdog && pip3 instal
  wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb
  
 # Create and define the container's working directory.
-ENV FLASK_APP=app.py
+
 RUN git clone https://github.com/slazaru/secur_IOT.git /reports/describe/secur_IOT
 
 EXPOSE 3000
 WORKDIR /reports/flaskapp
-CMD [ "/usr/local/bin/flask", "run", "--host=0.0.0.0", "--port=3000" ]
+ENV FLASK_RUN_PORT=3000 FLASK_APP=/reports/flaskapp/app.py FLASK_RUN_HOST=0.0.0.0
+CMD [ "flask", "run"]
 
