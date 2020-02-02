@@ -7,6 +7,24 @@ version: "3.7"
 # but need to put in each service
     
 services:
+
+
+    redis:
+        image: redis:4.0.5-alpine
+        container_name: redis_cache
+        environment:
+            - LANG="en_US.UTF-8"
+            - LANGUAGE="en_US.UTF-8"
+            - TZ="Australia/Sydney"
+        command: ["redis-server", "--appendonly", "yes"]
+        hostname: redis
+        ports:
+            - "6379:6379"
+        volumes:
+          - "redis_data:/testbed/redis_data"
+        restart: always
+
+
     wireless: # pcap and wireless interface
         build: 
            ./wireless
@@ -17,10 +35,16 @@ services:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
+            - REDIS_URL=redis://redis_cache
         privileged: true
         tty: true
         volumes: 
             - "/testbed/pcaps:/pcaps"
+        depends_on:
+            - redis
+        restart: always
+        links:
+            - redis
         
            
     describe:
@@ -35,10 +59,15 @@ services:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
+            - REDIS_URL=redis://redis_cache
+        depends_on:
+            - redis
+        restart: always
+        links:
+            - redis
 
     snort:
         image: snort
-        # network_mode: "host"
         ports: 
         - "8080:8080"
         environment:
@@ -47,11 +76,33 @@ services:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
+            - REDIS_URL=redis://redis_cache
         volumes:
             - "/testbed/pcaps:/pcaps"
+        depends_on:
+            - redis
+        restart: always
+        links:
+            - redis
+
+    pentest:
+        image: pentest
+        network_mode: "host"
+        environment:
+            - LANG="en_US.UTF-8"
+            - LANGUAGE="en_US.UTF-8"
+            - TZ="Australia/Sydney"
+            - REDIS_URL=redis://redis_cache
+        volumes:
+            - "/testbed/reports:/reports"
+        depends_on:
+            - redis
+        restart: always
+        links:
+            - redis
 
 
 volumes: 
     pcaps:
     reports: 
-  
+    redis_data:
