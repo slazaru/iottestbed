@@ -88,7 +88,8 @@ RUN apt-get install iw -y && \
  cp /root/secur_IOT/bootstrap.min.css /var/www/html/ && \
  apt-get install cron -y && \
  mkdir -p /root/captures && \
- echo "* *    * * *   root    find /root/captures | tail -n +289 | xargs rm -f" >> /etc/crontab
+ echo "* *    * * *   root    find /root/captures | tail -n +289 | xargs rm -f" >> /etc/crontab && \
+ cp /root/pcapGrok/example_hostsfile /root/example_hostsfile
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
