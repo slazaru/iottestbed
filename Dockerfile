@@ -85,9 +85,12 @@ RUN apt-get install iw -y && \
  ln -s /root/secur_IOT/pcapreporter.py /usr/local/sbin && \
  chmod +x /root/secur_IOT/pcapreporter.py && \
  apt-get install -y poppler-utils && \
- cp /root/secur_IOT/bootstrap.min.css /var/www/html/
+ cp /root/secur_IOT/bootstrap.min.css /var/www/html/ && \
+ apt-get install cron -y && \
+ mkdir -p /root/captures && \
+ echo "* *    * * *   root    find /root/captures | tail -n +289 | xargs rm -f" >> /etc/crontab
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENTRYPOINT /etc/init.d/ssh restart && service nginx restart && /bin/bash
+ENTRYPOINT /etc/init.d/ssh restart && service nginx restart && tcpdump -i $(cat /root/device) -G 300 -w /root/captures/capture_%Y_%m_%d_%H:%M:%S.pcap && service cron restart && /bin/bash
