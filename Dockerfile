@@ -83,7 +83,11 @@ COPY /device /root/device
 RUN apt-get install iw -y && \
  sed "s/eth0/$(cat /root/device)/g" -i /opt/zeek/etc/node.cfg  && \
  ln -s /root/secur_IOT/pcapreporter.py /usr/local/sbin && \
+ ln -s /root/secur_IOT/generate.py /usr/local/sbin && \
+ ln -s /root/secur_IOT/monitor.py /usr/local/sbin && \
  chmod +x /root/secur_IOT/pcapreporter.py && \
+ chmod +x /root/secur_IOT/generate.py && \
+ chmod +x /root/secur_IOT/monitor.py && \
  apt-get install -y poppler-utils && \
  cp /root/secur_IOT/bootstrap.min.css /var/www/html/ && \
  apt-get install cron -y && \
