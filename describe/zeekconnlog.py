@@ -219,7 +219,7 @@ class ZeekConnGraphManager(object):
 			logging.info('## looked up %s and added %s' % (node,ddict))
 		else: # exists - add to ip_macdict etc
 			if mymac != ddict['mac']:
-				print('hum. mymac',mymac,'ddict mac',ddict['mac'],'for',ddict['ip'])
+				logging.debug('hum. mymac %s ddict mac %s for %s' % (mymac,ddict['mac'],ddict['ip']))
 			if ddict['mac'] > '' and ddict['mac'] != ddict['ip']:
 				self.checkmacdict(ddict['ip'],ddict['mac'])		
 			
