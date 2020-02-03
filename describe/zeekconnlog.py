@@ -95,7 +95,7 @@ class ZeekConnGraphManager(object):
 			raise ValueError("Only layers 2,3 and 4 supported")
 		for (src, dst, packet) in edges:
 			if src == '':
-				print('empty src in edges for packet=',packet)
+				logging.debug('empty src in edges for packet = %s' % packet)
 				continue
 			if self.layer == 4 and self.squishPorts:
 				if len(src.split(':')) == 2:
@@ -151,10 +151,9 @@ class ZeekConnGraphManager(object):
 		amac = self.ip_macdict.get(ip,None)
 		anip = self.mac_ipdict.get(mac,None)
 		if not amac: # not there yet
-			if (len(ip.split(':')) == 1 or len(ip.split('::')) == 1) and len(mac.split(':')) == 6: # mac - not ipv6
+			if (len(ip.split(':')) == 1 or len(ip.split('::')) == 1) and len(mac.split(':')) == 6 : # mac - not ipv6
 				self.ip_macdict[ip] = mac
 				self.mac_ipdict[mac] = ip
-		# print('checkmacdict ip',ip,'mac',mac)
 
 	def _retrieve_node_info(self, node, packet):				
 		"""cache all (slow!) fqdn reverse dns lookups from ip"""
@@ -221,7 +220,7 @@ class ZeekConnGraphManager(object):
 		else: # exists - add to ip_macdict etc
 			if mymac != ddict['mac']:
 				print('hum. mymac',mymac,'ddict mac',ddict['mac'],'for',ddict['ip'])
-			if ddict['mac'] > '':
+			if ddict['mac'] > '' and ddict['mac'] != ddict['ip']:
 				self.checkmacdict(ddict['ip'],ddict['mac'])		
 			
 
@@ -350,13 +349,16 @@ class ZeekConnGraphManager(object):
 			ns = ''.join(nodelabel)
 			node.attr['label'] = ns
 			
-			
+		totalbytes = 0
 		for edge in graph.edges():
 			connection = self.graph[edge[0]][edge[1]]
+			totalbytes += int(connection['transmitted'])
+		for edge in graph.edges():
+			connection = self.graph[edge[0]][edge[1]]	
 			edge.attr['label'] = 'transmitted: %i bytes\n%s ' % (connection['transmitted'], ' | '.join(connection['layers']))
-			edge.attr['fontsize'] = '8'
+			edge.attr['fontsize'] = '11'
 			edge.attr['minlen'] = '2'
-			edge.attr['penwidth'] = min(max(0.05,connection['connections'] * 1.0 / len(self.graph.nodes())), 2.0)
+			edge.attr['penwidth'] = min(max(0.05,8*connection['transmitted']/float(totalbytes)), 8.0)
 		graph.layout(prog=self.args.layoutengine)
 		graph.draw(filename)
 
@@ -484,7 +486,7 @@ def prepipmacdicts(dnscache):
 		if amac and anip and (len(anip.split(':')) == 1 or len(anip.split('::')) == 1) and len(amac.split(':')) == 6 and amac != anip: # mac - not ipv6
 			ipm[anip] = amac
 			mip[amac] = anip
-	print('ipm=',ipm,'\nmip=',mip)
+	# print('ipm=',ipm,'\nmip=',mip)
 	return ipm,mip
 
 DHCP_PORT = 67
@@ -542,7 +544,7 @@ else:
 if os.path.isfile(dnsCACHEfile):
 	dnsCACHE = readDnsCache(dnsCACHEfile,dnsCACHE)
 	ip_macdict,mac_ipdict = prepipmacdicts(dnsCACHE)
-	print('ip_macdict',ip_macdict,'mac_ipdict',mac_ipdict)
+	# print('ip_macdict',ip_macdict,'mac_ipdict',mac_ipdict)
 else:
 	logging.info('### No dnsCACHE file %s found. Will create a new one' % dnsCACHEfile)
 inz = args.connlog
@@ -567,20 +569,20 @@ for layer in [2,3,4]:
 	g = ZeekConnGraphManager(packets, layer=layer, args = args, dnsCACHE=dnsCACHE,ip_macdict=ip_macdict,mac_ipdict=mac_ipdict, title=titl )
 	fn = 'conn_layer%d.pdf' % layer
 	g.draw(filename=fn)
-	dnsCACHE=copy.copy(g.dnsCACHE)
-	mac_ipdict = g.mac_ipdict # these may have been added to...
-	ip_macdict = g.ip_macdict
+	dnsCACHE = copy.copy(g.dnsCACHE)
+	mac_ipdict = copy.copy(g.mac_ipdict) # these may have been added to...
+	ip_macdict = copy.copy(g.ip_macdict)
 layer = 4
 args.squishPorts = True
 g = ZeekConnGraphManager(packets, layer=layer, args = args, dnsCACHE=dnsCACHE,ip_macdict=ip_macdict,mac_ipdict=mac_ipdict,title=titl )
 fn = 'connsquished_layer%d.pdf' % layer
 g.draw(filename=fn)
-dnsCACHE=copy.copy(g.dnsCACHE)
+dnsCACHE = copy.copy(g.dnsCACHE)
 mac_ipdict = copy.copy(g.mac_ipdict) # these may have been added to...
 ip_macdict = copy.copy(g.ip_macdict)
 
-
-
+print('ip_macdict',ip_macdict)
+print('mac_ipdict',mac_ipdict)
 saveDNS(dnsCACHE,ip_macdict)
-print('ip_macdict=',ip_macdict,'mac_ipdict=',mac_ipdict)
+
 
