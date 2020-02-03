@@ -37,8 +37,7 @@ class pcapStore():
 		pcapfnames = []
 		pcaptds = [] # date time started
 		pcapinfo = []
-		for dirName, subdirList, fileList in os.walk(self.pcapsFolder):
-		
+		for dirName, subdirList, fileList in os.walk(self.pcapsFolder):	
 			for pfn in fileList:
 				fs = pfn.split('_') # assume name works this way...
 				if len(fs) == 2:
@@ -50,7 +49,7 @@ class pcapStore():
 						fsdtt = int(time.mktime(fsdt.timetuple()))
 						pcapinfo.append([fsdtt,ppath])
 					except:
-						logging.warning('Found pcap file name %s in path %s - expected something else...ignoring' % (pfn,self.pcapsFolder))
+						logging.warning('Found pcap file name %s in path %s - expected %s preceded by an underscore - ignoring' % (pfn,self.pcapsFolder,FSDTFORMAT))
 		pcapinfo.sort()
 		self.pcapfnames = [x[1] for x in pcapinfo]
 		self.pcaptds = [x[0] for x in pcapinfo]
