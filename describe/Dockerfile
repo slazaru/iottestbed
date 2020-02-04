@@ -41,6 +41,6 @@ RUN git clone https://github.com/slazaru/secur_IOT.git /reports/describe/secur_I
 
 EXPOSE 3000
 WORKDIR /reports/flaskapp
-ENV FLASK_RUN_PORT=3000 FLASK_APP=/reports/flaskapp/app.py FLASK_RUN_HOST=0.0.0.0
-CMD [ "flask", "run"]
-
+ENV FLASK_RUN_PORT="3000" FLASK_APP="/reports/flaskapp/app.py" FLASK_RUN_HOST="0.0.0.0"
+#CMD [ "flask", "run"]
+CMD tail -f /dev/null

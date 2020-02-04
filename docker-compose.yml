@@ -21,8 +21,8 @@ services:
         ports:
             - "6379:6379"
         volumes:
-          - "/testbed/redis_data:redis_data"
-        restart: always
+          - "/testbed/redis_data:/redis_data"
+        #restart: always
 
 
     wireless: # pcap and wireless interface
@@ -30,7 +30,7 @@ services:
            ./wireless
         network_mode: "host"
         environment:
-            - INTERFACE=wlp2s0
+            - INTERFACE=wlx00e04c04fb50
             - DEBUG="1"
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
@@ -41,7 +41,7 @@ services:
         volumes: 
             - "/testbed/pcaps:/pcaps"
 
-        restart: always
+        #restart: always
         
            
     describe:
@@ -59,12 +59,12 @@ services:
             - REDIS_URL=redis://redis_cache
         depends_on:
            - rredis
-        restart: always
+        #restart: always
         links:
            - rredis
 
     snort:
-        image: snort
+        build: ./snort
         ports: 
         - "8080:8080"
         environment:
@@ -78,12 +78,12 @@ services:
             - "/testbed/pcaps:/pcaps"
         depends_on:
             - rredis 
-        restart: always
+        #restart: always
         links:
             - rredis
 
     pentest:
-        image: pentest
+        build: ./pentest
         # network_mode: "host"
         environment:
             - LANG="en_US.UTF-8"
@@ -94,7 +94,7 @@ services:
             - "/testbed/reports:/reports"
         depends_on:
             - rredis 
-        restart: always
+        #restart: always
         links:
             - rredis
 

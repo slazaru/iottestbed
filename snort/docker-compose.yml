@@ -6,6 +6,6 @@ services:
     ports: 
       - "8080:8080"
     environment:
-      INTERFACE: "enp0s25"
+      INTERFACE: "enp3s0"
       HOST_NET: "192.168.1.0/8"
 

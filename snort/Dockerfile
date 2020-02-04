@@ -6,7 +6,7 @@
 FROM alpine:3.6
 
 # Default interface, can be overidden at runtime
-ENV INTERFACE='eth0'
+ENV INTERFACE='wlx00e04c04fb50'
 # pid file location for pulledpork HUP of snort on rule update
 ENV PID_FILE=/var/run/snort_$INTERFACE
 # Default HOME_NET, can be overridden at runtime
