@@ -60,7 +60,7 @@ services:
             - type: bind
               target: /testpcaps
               source: /testbed/testpcaps
-           - type: bind
+            - type: bind
               target: /reports
               source: /testbed/reports
         ports:

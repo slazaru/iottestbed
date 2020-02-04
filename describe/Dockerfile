@@ -11,7 +11,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # update image and get some essentials
 RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget \
-python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8
+net-tools iputils-ping python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
 
 # python3 goes bonkers if these are not set
