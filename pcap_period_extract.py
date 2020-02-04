@@ -1,7 +1,11 @@
 # extract all packets within a time window as a pcap file from a folder of rotated pcap logs 
 # ross lazarus
+# FSDTFORMAT should correspond to the suffix of the filename made by tcpdump
 # tcpdump -i en0 -w "testbed_%Y-%m-%d-%H:%M:%S.pcap" -G 3600 
-
+# for example. Use whatever you want before the underscore 
+# and anything you like as the extension
+# mismatched timezone settings between capture and analysis 
+# images will cause the obvious consequences. 
 
 import os
 from datetime import datetime
@@ -50,7 +54,7 @@ class pcapStore():
 						pcapinfo.append([fsdtt,ppath])
 					except:
 						logging.warning('Found pcap file name %s in path %s - expected %s preceded by an underscore - ignoring' % (pfn,self.pcapsFolder,FSDTFORMAT))
-		pcapinfo.sort()
+		pcapinfo.sort() # files might turn up in any old order in complex archives
 		self.pcapfnames = [x[1] for x in pcapinfo]
 		self.pcaptds = [x[0] for x in pcapinfo]
 		
@@ -58,7 +62,7 @@ class pcapStore():
 	def writePeriod(self,sdt,edt,pcapdest):
 		"""write packets in a datetime window into pcapdest as pcap
 		"""
-		self.readFolder() # in case any new ones since we started running
+		self.readFolder() # in case any new ones since object instantiated
 		respcap = []
 		edtt = time.mktime(edt.timetuple()) # as seconds since epoch
 		sdtt = time.mktime(sdt.timetuple())
@@ -94,4 +98,4 @@ if __name__ == "__main__": # testing testbed_2020-02-03-18:42:00.pcap
 	dest = '/tmp/test3hour.pcap'
 	sdt = datetime.strptime('2020-02-03-18:30:00', FSDTFORMAT)
 	edt = datetime.strptime('2020-02-03-19:00:00', FSDTFORMAT)
-	ps.writePeriod(sdt,edt,dest)
+	ok = ps.writePeriod(sdt,edt,dest)

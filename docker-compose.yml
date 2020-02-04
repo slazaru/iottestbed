@@ -80,7 +80,7 @@ services:
             - rredis 
         restart: always
         links:
-            - redis
+            - rredis
 
     pentest:
         image: pentest
