@@ -58,6 +58,9 @@ services:
               target: /pcaps
               source: /testbed/pcaps
             - type: bind
+              target: /testpcaps
+              source: /testbed/testpcaps
+           - type: bind
               target: /reports
               source: /testbed/reports
         ports:
@@ -92,6 +95,9 @@ services:
             - type: bind
               target: /reports
               source: /testbed/reports
+            - type: bind
+              target: /testpcaps
+              source: /testbed/testpcaps
         depends_on:
             - rredis 
         #restart: always
@@ -113,6 +119,9 @@ services:
             - type: bind
               target: /reports
               source: /testbed/reports
+            - type: bind
+              target: /testpcaps
+              source: /testbed/testpcaps
         depends_on:
             - rredis 
         #restart: always
