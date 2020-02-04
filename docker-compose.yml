@@ -26,8 +26,7 @@ services:
 
 
     wireless: # pcap and wireless interface
-        build: 
-           ./wireless
+        build: ./wireless
         network_mode: "host"
         environment:
             - INTERFACE=wlx00e04c04fb50
