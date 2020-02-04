@@ -150,6 +150,7 @@ RUN echo "**** install Python ****" && \
 
 ## Install websnort
 RUN pip3 install --upgrade pip && pip3 install websnort
+# write our own conf files known to at least work somewhat
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
 
