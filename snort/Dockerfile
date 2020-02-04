@@ -12,7 +12,7 @@ ENV PID_FILE=/var/run/snort_$INTERFACE
 # Default HOME_NET, can be overridden at runtime
 ENV HOME_NET=192.168.1.0/24
 # Placehoder for oinkcode if not provided at runtime
-ENV OINKCODE=6c89795d10d7bc62aa494e4f9144f9d7f7a4d59b
+ENV OINKCODE=[your oink here]
 
 # Install runtime dependencies
 RUN apk add --no-cache tini \

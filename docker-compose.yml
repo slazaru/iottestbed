@@ -26,11 +26,10 @@ services:
 
 
     wireless: # pcap and wireless interface
-        build: 
-           ./wireless
+        build: ./wireless
         network_mode: "host"
         environment:
-            - INTERFACE=wlp2s0
+            - INTERFACE=wlx00e04c04fb50
             - DEBUG="1"
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
@@ -64,7 +63,7 @@ services:
            - rredis
 
     snort:
-        image: snort
+        build: ./snort
         ports: 
         - "8080:8080"
         environment:
@@ -83,7 +82,7 @@ services:
             - rredis
 
     pentest:
-        image: pentest
+        build: ./pentest
         # network_mode: "host"
         environment:
             - LANG="en_US.UTF-8"
