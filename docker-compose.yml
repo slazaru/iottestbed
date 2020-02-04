@@ -21,7 +21,9 @@ services:
         ports:
             - "6379:6379"
         volumes:
-          - "/testbed/redis_data:/redis_data"
+            - type: bind
+              target: /redis_data
+              source: /testbed/redis_data
         #restart: always
 
 
@@ -29,7 +31,7 @@ services:
         build: ./wireless
         network_mode: "host"
         environment:
-            - INTERFACE=wlx00e04c04fb50
+            - INTERFACE=$WIRELESSINTERFACE #wlp2s0
             - DEBUG="1"
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
@@ -38,7 +40,12 @@ services:
         privileged: true
         tty: true
         volumes: 
-            - "/testbed/pcaps:/pcaps"
+            - type: bind
+              target: /pcaps
+              source: /testbed/pcaps
+            - type: bind
+              target: /filedrop
+              source: /testbed/filedrop
 
         #restart: always
         
@@ -47,8 +54,12 @@ services:
         build: ./describe
         tty: true
         volumes: 
-            - "/testbed/pcaps:/pcaps"
-            - "/testbed/reports:/reports"
+            - type: bind
+              target: /pcaps
+              source: /testbed/pcaps
+            - type: bind
+              target: /reports
+              source: /testbed/reports
         ports:
             - "3000:3000"
         environment:
@@ -67,14 +78,20 @@ services:
         ports: 
         - "8080:8080"
         environment:
-            - INTERFACE="enp0s25"
+            - INTERFACE=$SNORTINTERFACE
             - HOST_NET="192.168.1.0/8"
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
-        volumes:
-            - "/testbed/pcaps:/pcaps"
+            - OINKCODE=$OINKCODE
+        volumes: 
+            - type: bind
+              target: /pcaps
+              source: /testbed/pcaps
+            - type: bind
+              target: /reports
+              source: /testbed/reports
         depends_on:
             - rredis 
         #restart: always
@@ -89,8 +106,13 @@ services:
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
-        volumes:
-            - "/testbed/reports:/reports"
+        volumes: 
+            - type: bind
+              target: /pcaps
+              source: /testbed/pcaps
+            - type: bind
+              target: /reports
+              source: /testbed/reports
         depends_on:
             - rredis 
         #restart: always
@@ -98,7 +120,14 @@ services:
             - rredis
 
 
-volumes: 
-    pcaps:
-    reports: 
-    redis_data:
+
+
+#volumes: 
+    #pcaps:
+      #external: true
+    #reports: 
+      #external: true
+    #redis_data:
+      #external: true
+    #filedrop:
+      #external: true
