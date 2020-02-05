@@ -81,6 +81,7 @@ RUN git clone https://github.com/slazaru/secur_IOT.git /root/secur_IOT && \
 # current
 COPY /device /root/device
 RUN apt-get install iw -y && \
+ cd /root && \
  sed "s/eth0/$(cat /root/device)/g" -i /opt/zeek/etc/node.cfg  && \
  ln -s /root/secur_IOT/pcapreporter.py /usr/local/sbin && \
  ln -s /root/secur_IOT/generate.py /usr/local/sbin && \
@@ -97,7 +98,27 @@ RUN apt-get install iw -y && \
  chmod +x /root/secur_IOT/generate.py && \
  chmod +x /root/secur_IOT/monitor.py
 
+# cameradar
+RUN apt-get install software-properties-common -y && \
+ add-apt-repository ppa:gophers/archive -y && \
+ apt-get update -y && \
+ apt-get install golang-1.11-go -y && \ 
+ apt-get install libcurl4-openssl-dev -y
+
+RUN export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH} && \
+ export GO111MODULE=auto  && \
+ go get github.com/Ullaakut/cameradar && \
+ cd /root/go/src/github.com/Ullaakut/cameradar/cmd/cameradar && \
+ export GO111MODULE=on && \
+ go install
+
+RUN echo "export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH}" >> /root/.bashrc
+
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENTRYPOINT /etc/init.d/ssh restart && service nginx restart && tcpdump -i $(cat /root/device) -G 300 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && service cron restart && /bin/bash
+ENTRYPOINT /etc/init.d/ssh restart && \
+ service nginx restart && \
+ tcpdump -i $(cat /root/device) -G 300 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
+ service cron restart && \
+ /bin/bash
