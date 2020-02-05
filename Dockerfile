@@ -103,16 +103,19 @@ RUN apt-get install software-properties-common -y && \
  add-apt-repository ppa:gophers/archive -y && \
  apt-get update -y && \
  apt-get install golang-1.11-go -y && \ 
- apt-get install libcurl4-openssl-dev -y
-
-RUN export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH} && \
+ apt-get install libcurl4-openssl-dev -y && \
+ export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH} && \
  export GO111MODULE=auto  && \
  go get github.com/Ullaakut/cameradar && \
  cd /root/go/src/github.com/Ullaakut/cameradar/cmd/cameradar && \
  export GO111MODULE=on && \
- go install
+ go install && \
+ echo "export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH}" >> /root/.bashrc && \
+ echo "export GOPATH=/root/go" >> /root/.bashrc
 
-RUN echo "export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH}" >> /root/.bashrc
+# for testing - last step is update repos
+RUN  cd /root/secur_IOT && git pull && \
+ cd /root/pcapGrok && git pull
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
