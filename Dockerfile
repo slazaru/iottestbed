@@ -67,9 +67,6 @@ RUN cat wlan_config.txt | grep root| chpasswd  && \
  rm /var/www/html/index.nginx-debian.html && \
  pip install shodan
 
-# may need to change node.cfg nano /opt/zeek/etc/node.cfg docker interface might not be same as default
-RUN /opt/zeek/bin/zeekctl install && /opt/zeek/bin/zeekctl deploy && /opt/zeek/bin/zeekctl start
-
 # set up secur_iot tools
 RUN git clone https://github.com/slazaru/secur_IOT.git /root/secur_IOT && \
  mkdir -p /usr/share/wordlists && \
@@ -115,7 +112,8 @@ RUN apt-get install software-properties-common -y && \
 
 # for testing - last step is update repos
 RUN  cd /root/secur_IOT && git pull && \
- cd /root/pcapGrok && git pull
+ cd /root/pcapGrok && git pull && \ 
+ cd /root
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

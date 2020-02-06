@@ -197,6 +197,10 @@ service_start () {
     ### start hostapd and dnsmasq in the container
     echo -e "[+] Starting ${GREEN}hostapd${NC} and ${GREEN}dnsmasq${NC} in the docker container ${GREEN}$DOCKER_NAME${NC}"
     docker exec "$DOCKER_NAME" start_ap
+
+    ### start zeek
+    echo "[+] Starting zeek .."
+    docker exec "$DOCKER_NAME" /opt/zeek/bin/zeekctl deploy >/dev/null 2>&1
 }
 
 service_stop () { 
