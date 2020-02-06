@@ -10,7 +10,7 @@ WORKDIR /reports/describe
 ENV DEBIAN_FRONTEND noninteractive
 
 # update image and get some essentials
-RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget \
+RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata\
 net-tools iputils-ping python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
 
@@ -38,7 +38,7 @@ RUN apt-get install -y git poppler-utils && pip3 install watchdog && pip3 instal
 # Create and define the container's working directory.
 
 RUN git clone https://github.com/slazaru/secur_IOT.git /reports/describe/secur_IOT
-
+RUN cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 EXPOSE 3000
 WORKDIR /reports/flaskapp
 ENV FLASK_RUN_PORT="3000" FLASK_APP="/reports/flaskapp/app.py" FLASK_RUN_HOST="0.0.0.0"

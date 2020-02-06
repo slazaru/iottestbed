@@ -122,9 +122,18 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
 # this is lame but known to work in at least one of far too many trials.
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
-# Update community rules for Snort
-RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf
 
+# from https://github.com/shirkdog/pulledpork
+# RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -i /etc/snort/disablesid.conf -b /etc/snort/dropsid.conf \
+#  -e /etc/snort/enablesid.conf -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
+
+
+
+## Rule management
+## Enable all rules!! slows down!
+RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
+RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf
+#RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -h /var/log/sid_changes.log -I security 
 # Copy local.rules
 COPY /files/local.rules /etc/snort/rules/local.rules
 
@@ -154,12 +163,11 @@ RUN pip3 install --upgrade pip && pip3 install websnort
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
 
+RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
 
 RUN apk del .build-deps &&  rm -rf ~/snort_src
 
-## Rule management
-## Enable all rules!! slows down!
-## RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
+
 # Use tini as init
 EXPOSE 8080
 CMD ["/sbin/tini", "--", "/entrypoint.sh"]

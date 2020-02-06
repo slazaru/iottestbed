@@ -12,6 +12,7 @@ services:
     rredis:
         image: redis:4.0.5-alpine
         container_name: redis_cache
+        network_mode: "bridge"
         environment:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
@@ -21,9 +22,7 @@ services:
         ports:
             - "6379:6379"
         volumes:
-            - type: bind
-              target: /redis_data
-              source: /testbed/redis_data
+        - /testbed/redis_data:/redis_data
         #restart: always
 
 
@@ -40,12 +39,9 @@ services:
         privileged: true
         tty: true
         volumes: 
-            - type: bind
-              target: /pcaps
-              source: /testbed/pcaps
-            - type: bind
-              target: /filedrop
-              source: /testbed/filedrop
+        - /testbed/pcaps:/pcaps
+        - /testbed/filedrop:/filedrop
+        - /testbed/testpcaps:/testpcaps
 
         #restart: always
         
@@ -53,16 +49,11 @@ services:
     describe:
         build: ./describe
         tty: true
-        volumes: 
-            - type: bind
-              target: /pcaps
-              source: /testbed/pcaps
-            - type: bind
-              target: /testpcaps
-              source: /testbed/testpcaps
-            - type: bind
-              target: /reports
-              source: /testbed/reports
+        network_mode: "bridge"
+        volumes:
+        - /testbed/pcaps:/pcaps
+        - /testbed/reports:/reports
+        - /testbed/testpcaps:/testpcaps
         ports:
             - "3000:3000"
         environment:
@@ -73,11 +64,11 @@ services:
         depends_on:
            - rredis
         #restart: always
-        links:
-           - rredis
+
 
     snort:
         build: ./snort
+        network_mode: "bridge"
         ports: 
         - "8080:8080"
         environment:
@@ -89,44 +80,32 @@ services:
             - REDIS_URL=redis://redis_cache
             - OINKCODE=$OINKCODE
         volumes: 
-            - type: bind
-              target: /pcaps
-              source: /testbed/pcaps
-            - type: bind
-              target: /reports
-              source: /testbed/reports
-            - type: bind
-              target: /testpcaps
-              source: /testbed/testpcaps
+        - /testbed/pcaps:/pcaps
+        - /testbed/reports:/reports
+        - /testbed/testpcaps:/testpcaps
         depends_on:
             - rredis 
         #restart: always
-        links:
-            - rredis
+        # links:
+        #   - rredis
 
     pentest:
         build: ./pentest
-        # network_mode: "host"
+        network_mode: "host"
         environment:
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
         volumes: 
-            - type: bind
-              target: /pcaps
-              source: /testbed/pcaps
-            - type: bind
-              target: /reports
-              source: /testbed/reports
-            - type: bind
-              target: /testpcaps
-              source: /testbed/testpcaps
+        - /testbed/pcaps:/pcaps
+        - /testbed/reports:/reports
+        - /testbed/testpcaps:/testpcaps
         depends_on:
             - rredis 
         #restart: always
-        links:
-            - rredis
+        #links:
+        #   - rredis
 
 
 
