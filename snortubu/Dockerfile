@@ -21,7 +21,7 @@ WORKDIR /install
 # Install runtime dependencies
 RUN apt-get update -y && apt-get install -y \
     libpcre3-dev libdumbnet-dev bison flex zlib1g-dev liblzma-dev openssl libssl-dev build-essential g++ \
-    libcrypt-ssleay-perl \
+    libcrypt-ssleay-perl apt-utils\
     libwww-perl \
     liblwp-useragent-determined-perl \
     liblwp-protocol-https-perl \
@@ -67,8 +67,7 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           ln -s /usr/include/tirpc/netconfig.h /usr/include/netconfig.h && \
           wget https://snort.org/downloads/snort/snort-$SNORTV.tar.gz && \ 
           tar -xvzf snort-$SNORTV.tar.gz && \
-          cd snort-$SNORTV && \
-          ./configure --enable-sourcefire && \
+          cd snort-$SNORTV &&  ./configure --enable-sourcefire && \
           make && \
           make install &&  \
           ln -s /usr/local/bin/snort /usr/sbin/snort && \
@@ -94,7 +93,6 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           chown -R snort:snort /etc/snort && \
           chown -R snort:snort /var/log/snort && \
           chown -R snort:snort /usr/local/lib/snort_dynamicrules && \
-
           cp etc/*.conf* /etc/snort && \
           cp etc/*.map /etc/snort && \
           cp etc/*.dtd /etc/snort && \
@@ -134,6 +132,10 @@ RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
 ENV OINKCODE=6c89795d10d7bc62aa494e4f9144f9d7f7a4d59b
 RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf
 
+# write our own conf files known to at least work somewhat
+COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
+COPY /files/snort.conf /etc/snort/snort.conf
+
 RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf 
 # Copy local.rules
 COPY /files/local.rules /etc/snort/rules/local.rules
@@ -150,9 +152,6 @@ RUN apt-get install -y python3 python3-pip nano cron && \
     if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi
 
 
-# write our own conf files known to at least work somewhat
-COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
-COPY /files/snort.conf /etc/snort/snort.conf
 
 
 # RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
