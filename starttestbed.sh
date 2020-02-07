@@ -201,6 +201,10 @@ service_start () {
     ### start zeek
     echo "[+] Starting zeek .."
     docker exec "$DOCKER_NAME" /opt/zeek/bin/zeekctl deploy >/dev/null 2>&1
+
+    ### start snort server
+    echo "[+] Starting snort web server .. This may take some time to start up on first run .."
+    docker exec "$DOCKER_NAME" entrypoint.sh >/dev/null 2>&1 &
 }
 
 service_stop () { 
