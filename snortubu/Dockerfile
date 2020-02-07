@@ -3,7 +3,7 @@
 # january 28 2020
 # derived from https://github.com/patrickneise/snort.git
 
-FROM ubuntu:18.04
+FROM ubuntu:18.04 as ubu
 
 # Default interface, can be overidden at runtime
 ENV INTERFACE='wlx00e04c04fb50' DEBIAN_FRONTEND=noninteractive
@@ -13,6 +13,11 @@ ENV PID_FILE=/var/run/snort_$INTERFACE
 ENV HOME_NET=192.168.1.0/24
 # Placehoder for oinkcode if not provided at runtime
 ENV OINKCODE="placeholder"
+# Copy local.rules
+COPY /files/local.rules /etc/snort/rules/local.rules
+
+# Entrypoint script for runtime config and starting snort
+COPY entrypoint.sh /
 
 RUN mkdir /install
 WORKDIR /install
@@ -43,7 +48,17 @@ RUN apt-get update -y && apt-get install -y \
     wget libhwloc-dev \
     libluajit-5.1-2 libluajit-5.1-dev libluajit-5.1-common \
     g++ locales
-    
+
+
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get install -y python3 python3-pip nano cron && \
+    if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
+    python3 -m pip install -U pip && \
+    pip3 install --no-cache --upgrade pip setuptools wheel websnort && \
+    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi
+
+
 RUN  wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz \
     && tar zxf LuaJIT-2.0.5.tar.gz \
     && cd LuaJIT-2.0.5 \
@@ -56,6 +71,8 @@ RUN locale-gen en_US.UTF-8 && \
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
 
 ENV SNORTV="2.9.15.1" DAQV="2.0.6"
+
+FROM ubu as ubusnort
 
 RUN wget https://www.snort.org/downloads/snort/daq-$DAQV.tar.gz && \  
   tar -xvzf daq-$DAQV.tar.gz && cd daq-$DAQV && ./configure && make install && cd ../ \
@@ -120,36 +137,15 @@ RUN wget https://github.com/shirkdog/pulledpork/archive/master.tar.gz -O pulledp
 COPY ./files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY ./files/snort.conf /etc/snort/snort.conf
 
-# from https://github.com/shirkdog/pulledpork
-# RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -i /etc/snort/disablesid.conf -b /etc/snort/dropsid.conf \
-#  -e /etc/snort/enablesid.conf -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
-
-
-
 ## Rule management
 ## Enable all rules!! slows down!
 RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
 ENV OINKCODE=6c89795d10d7bc62aa494e4f9144f9d7f7a4d59b
-RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf  -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
+
 
 # write our own conf files known to at least work somewhat
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
-
-# RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf 
-# Copy local.rules
-COPY /files/local.rules /etc/snort/rules/local.rules
-
-# Entrypoint script for runtime config and starting snort
-COPY entrypoint.sh /
-
-ENV PYTHONUNBUFFERED=1
-
-RUN apt-get install -y python3 python3-pip nano cron && \
-    if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
-    python3 -m pip install -U pip && \
-    pip3 install --no-cache --upgrade pip setuptools wheel websnort && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi
 
 
 

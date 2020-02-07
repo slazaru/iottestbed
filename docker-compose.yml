@@ -76,7 +76,7 @@ services:
         - "8080:8080"
         environment:
             - INTERFACE=$SNORTINTERFACE
-            - HOST_NET="192.168.1.0/8"
+            - HOME_NET="192.168.1.0/8"
             - LANG="en_US.UTF-8"
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
