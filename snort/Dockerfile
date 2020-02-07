@@ -13,7 +13,8 @@ ENV PID_FILE=/var/run/snort_$INTERFACE
 ENV HOME_NET=192.168.1.0/24
 # Placehoder for oinkcode if not provided at runtime
 ENV OINKCODE="placeholder"
-
+RUN mkdir -p /snort
+WORKDIR /snort
 # Install runtime dependencies
 RUN apk add --no-cache tini \
     perl-net-ssleay \
@@ -47,31 +48,28 @@ RUN apk add --no-cache --virtual .build-deps \
     cmake \
     make \
     wget \
-    luajit \
-    g++
+    luajit nano \
+    g++ glibc
     
-RUN cd /tmp \
-    && wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz \
+RUN wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz \
     && tar zxf LuaJIT-2.0.5.tar.gz \
     && cd LuaJIT-2.0.5 \
-    && make -j3 && make install 
-# \ && ldconfig
-#  && ln -s /usr/local/include/luajit-2.0/* /usr/local/include/
+    && make -j3 && make install && cd ../ \
+    && ln -s /usr/local/include/luajit-2.0/* /usr/local/include/
+    # && ldconfig doesn't in alpine it seems
     
-
+ENV SNORTV="2.9.15.1"
 # Install and configure Snort and Pulled Pork then clean up
 # Using on large RUN command to minimize layers                      
 RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           ln -s /usr/include/tirpc/netconfig.h /usr/include/netconfig.h && \
-          mkdir ~/snort_src && \
-          cd ~/snort_src && \
-          wget https://snort.org/downloads/archive/snort/snort-2.9.9.0.tar.gz && \
-          tar -xvzf snort-2.9.9.0.tar.gz && \
-          cd snort-2.9.9.0 && \
+          wget https://snort.org/downloads/archive/snort/snort-$SNORTV.tar.gz && \
+          tar -xvzf snort-$SNORTV.tar.gz && \
+          cd snort-$SNORTV && \
           ./configure --enable-sourcefire && \
           make && \
-          make install && \
-          ln -s /usr/local/bin/snort /usr/sbin/snort && \
+          make install 
+RUN ln -s /usr/local/bin/snort /usr/sbin/snort && cd ../ && \
           addgroup -S snort && \
           adduser -S snort -g snort && \
           mkdir /etc/snort && \
@@ -94,12 +92,10 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           chown -R snort:snort /etc/snort && \
           chown -R snort:snort /var/log/snort && \
           chown -R snort:snort /usr/local/lib/snort_dynamicrules && \
-          cd ~/snort_src/snort-2.9.9.0/etc/ && \
-          cp *.conf* /etc/snort && \
-          cp *.map /etc/snort && \
-          cp *.dtd /etc/snort && \
-          cd ~/snort_src/snort-2.9.9.0/src/dynamic-preprocessors/build/usr/local/lib/snort_dynamicpreprocessor/ && \
-          cp * /usr/local/lib/snort_dynamicpreprocessor/ && \
+          cp snort-$SNORTV/etc/*.conf* /etc/snort && \
+          cp snort-$SNORTV/*.map /etc/snort && \
+          cp snort-$SNORTV/*.dtd /etc/snort && \
+          cp snort-$SNORTV/src/dynamic-preprocessors/build/usr/local/lib/snort_dynamicpreprocessor/* /usr/local/lib/snort_dynamicpreprocessor/ && \
           sed -i \
           -e 's#^var RULE_PATH.*#var RULE_PATH /etc/snort/rules#' \
           -e 's#^var SO_RULE_PATH.*#var SO_RULE_PATH $RULE_PATH/so_rules#' \
@@ -110,7 +106,7 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           -e '$a\\ninclude $RULE_PATH/local.rules' \
           -e 's!^# \(config logdir:\)!\1 /var/log/snort!' \
           /etc/snort/snort.conf && \
-          cd ~/snort_src && \
+
           wget https://github.com/shirkdog/pulledpork/archive/master.tar.gz -O pulledpork-master.tar.gz && \
           tar xvzf pulledpork-master.tar.gz && \
           cd pulledpork-master/ && \
@@ -120,8 +116,8 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
 
 # Copy configure pulledpork.conf and snort. 
 # this is lame but known to work in at least one of far too many trials.
-COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
-COPY /files/snort.conf /etc/snort/snort.conf
+# COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
+# COPY /files/snort.conf /etc/snort/snort.conf
 
 # from https://github.com/shirkdog/pulledpork
 # RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -i /etc/snort/disablesid.conf -b /etc/snort/dropsid.conf \
@@ -131,7 +127,7 @@ COPY /files/snort.conf /etc/snort/snort.conf
 
 ## Rule management
 ## Enable all rules!! slows down!
-RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
+#RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
 RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf
 #RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -h /var/log/sid_changes.log -I security 
 # Copy local.rules

@@ -5,6 +5,8 @@ version: "3.7"
 
 # need tz for pcap files but wireless/pcap uses alpine - see wlan_start.sh
 # but need to put in each service
+# PUT YOUR OINKCODE in .env
+# as OINKCODE=xxxxxxxx..
     
 services:
 
@@ -54,6 +56,7 @@ services:
         - /testbed/pcaps:/pcaps
         - /testbed/reports:/reports
         - /testbed/testpcaps:/testpcaps
+        - /testbed/html:/var/www/html
         ports:
             - "3000:3000"
         environment:
@@ -67,7 +70,7 @@ services:
 
 
     snort:
-        build: ./snort
+        build: ./snortubu
         network_mode: "bridge"
         ports: 
         - "8080:8080"
@@ -78,7 +81,7 @@ services:
             - LANGUAGE="en_US.UTF-8"
             - TZ="Australia/Sydney"
             - REDIS_URL=redis://redis_cache
-            - OINKCODE=$OINKCODE
+            - OINKCODE=$OINKCODE # put yours in .env
         volumes: 
         - /testbed/pcaps:/pcaps
         - /testbed/reports:/reports
@@ -110,12 +113,3 @@ services:
 
 
 
-#volumes: 
-    #pcaps:
-      #external: true
-    #reports: 
-      #external: true
-    #redis_data:
-      #external: true
-    #filedrop:
-      #external: true

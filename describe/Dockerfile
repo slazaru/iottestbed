@@ -4,14 +4,15 @@
 
 FROM ubuntu:18.04
 
-RUN mkdir -p /reports/describe
+RUN mkdir -p /describe
 RUN mkdir -p /reports/flaskapp
-WORKDIR /reports/describe
+WORKDIR /describe
 ENV DEBIAN_FRONTEND noninteractive
 
 # update image and get some essentials
 RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata\
-net-tools iputils-ping python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8
+net-tools iputils-ping nano python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8 &&
+cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
 
 # python3 goes bonkers if these are not set
@@ -32,12 +33,12 @@ RUN chmod ug+rx /reports/flaskapp/app.py && chmod ug+rx /reports/flaskapp/descri
 RUN mkdir -p /usr/share/GeoIP
 
 RUN apt-get install -y git poppler-utils && pip3 install watchdog && pip3 install wordcloud && pip3 install networkx && \
- git clone https://github.com/fubar2/pcapGrok.git /root/pcapGrok && cd /root/pcapGrok && pip3 install -r requirements.txt && \
- wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb
+ git clone https://github.com/fubar2/pcapGrok.git  && cd pcapGrok && pip3 install -r requirements.txt && \
+ cd /describe && wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb
  
 # Create and define the container's working directory.
 
-RUN git clone https://github.com/slazaru/secur_IOT.git /reports/describe/secur_IOT
+RUN git clone https://github.com/slazaru/secur_IOT.git 
 RUN cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 EXPOSE 3000
 WORKDIR /reports/flaskapp
