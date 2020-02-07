@@ -10,8 +10,8 @@ WORKDIR /describe
 ENV DEBIAN_FRONTEND noninteractive
 
 # update image and get some essentials
-RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata\
-net-tools iputils-ping nano python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8 &&
+RUN apt-get update && apt-get upgrade -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata \
+net-tools iputils-ping nano python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8 && \
 cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
 
