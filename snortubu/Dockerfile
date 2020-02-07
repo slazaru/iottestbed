@@ -117,8 +117,8 @@ RUN wget https://github.com/shirkdog/pulledpork/archive/master.tar.gz -O pulledp
           
 # Copy configure pulledpork.conf and snort. 
 # this is lame but known to work in at least one of far too many trials.
-COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
-COPY /files/snort.conf /etc/snort/snort.conf
+COPY ./files/pulledpork.conf /etc/snort/pulledpork.conf
+COPY ./files/snort.conf /etc/snort/snort.conf
 
 # from https://github.com/shirkdog/pulledpork
 # RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -i /etc/snort/disablesid.conf -b /etc/snort/dropsid.conf \
@@ -130,13 +130,13 @@ COPY /files/snort.conf /etc/snort/snort.conf
 ## Enable all rules!! slows down!
 RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
 ENV OINKCODE=6c89795d10d7bc62aa494e4f9144f9d7f7a4d59b
-RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf
+RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf  -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
 
 # write our own conf files known to at least work somewhat
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
 
-RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf 
+# RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf 
 # Copy local.rules
 COPY /files/local.rules /etc/snort/rules/local.rules
 
@@ -159,4 +159,4 @@ RUN apt-get install -y python3 python3-pip nano cron && \
 # Use tini as init
 EXPOSE 8080 
 #CMD ["/sbin/tini", "--", "/entrypoint.sh"]
-ENTRYPOINT ["/bin/sh", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "--", "/entrypoint.sh"]

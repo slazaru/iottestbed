@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # update /etc/snort/snort.conf HOME_NET
 echo "SNORT (INFO) - Setting HOME_NET variable in snort.conf"
@@ -33,6 +33,6 @@ echo "SNORT (ERROR) - Pulled Pork update failed."
 # start websnort
 websnort > websnort.log
 # start snort
-echo "SNORT (INFO) - Staring snort with provided options: $@"
+echo "SNORT (INFO) - Starting snort with provided options: $@"
 exec snort -c /etc/snort/snort.conf "$@"
 
