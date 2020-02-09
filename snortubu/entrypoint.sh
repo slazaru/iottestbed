@@ -5,8 +5,8 @@ echo "SNORT (INFO) - Setting HOME_NET variable in snort.conf"
 sed -i 's#^ipvar HOME_NET.*#ipvar HOME_NET '"$HOME_NET"'#' /etc/snort/snort.conf
 # create cron job for Pull Pork updates
 echo "SNORT (INFO) - Creating PulledPork cron job for daily rule updates"
-croncmd="/usr/local/bin/pulledpork.pl -H -c /etc/snort/pulledpork.conf"
-cronjob="30      13      *       *       *       $croncmd"
+croncmd="/usr/local/bin/pulledpork.pl  -c /etc/snort/pulledpork.conf"
+cronjob="30      2      *       *       *       $croncmd"
 ( crontab -l | grep -v -F "$croncmd" ; echo "$cronjob" ) | crontab - && crond
 
 # oinkcode

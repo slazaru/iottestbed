@@ -1,14 +1,25 @@
-from flask import Flask
-from flask import request
-from flask import jsonify
+from fastapi import FastAPI
+from starlette.requests import Request
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 import os
 import logging
-logging.basicConfig(filename='flask.log',level=logging.INFO)
 
-app = Flask(__name__)
+# logging.basicConfig(filename='app.log',level=logging.INFO)
+
+
 
 attack_exe = 'python3 /reports/flaskapp/describe.py'
 describe_exe = 'python3 /reports/flaskapp/describe.py'
+
+
+app = FastAPI()
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
 
 """
 to send:

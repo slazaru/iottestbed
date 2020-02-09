@@ -4,7 +4,7 @@
 # derived from https://github.com/patrickneise/snort.git
 
 FROM ubuntu:18.04 as ubu
-
+ENV PYTHONUNBUFFERED=1
 # Default interface, can be overidden at runtime
 ENV INTERFACE='wlx00e04c04fb50' DEBIAN_FRONTEND=noninteractive
 # pid file location for pulledpork HUP of snort on rule update
@@ -50,7 +50,7 @@ RUN apt-get update -y && apt-get install -y \
     g++ locales
 
 
-ENV PYTHONUNBUFFERED=1
+
 
 RUN apt-get install -y python3 python3-pip nano cron && \
     if [ ! -e /usr/bin/python ]; then ln -sf python3 /usr/bin/python ; fi && \
@@ -142,17 +142,13 @@ COPY ./files/snort.conf /etc/snort/snort.conf
 RUN echo 'pcre:.' >> /etc/snort/enablesid.conf
 ENV OINKCODE=6c89795d10d7bc62aa494e4f9144f9d7f7a4d59b
 
-
 # write our own conf files known to at least work somewhat
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
 
-
-
-
+# best not done here. will start in entrypoint and doubling up causes trouble...
 # RUN /usr/local/bin/pulledpork.pl -c /etc/snort/pulledpork.conf -h /var/log/sid_changes.log -I security /usr/local/etc/snort/rules/
 
-# Use tini as init
 EXPOSE 8080 
-#CMD ["/sbin/tini", "--", "/entrypoint.sh"]
+
 ENTRYPOINT ["/bin/bash", "--", "/entrypoint.sh"]
