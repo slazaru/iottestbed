@@ -90,18 +90,18 @@ RUN ln -s /usr/include/tirpc/rpc /usr/include/rpc && \
           ln -s /usr/local/bin/snort /usr/sbin/snort && \
           groupadd snort && \
           useradd snort -g snort && \
-          mkdir /etc/snort && \
-          mkdir /etc/snort/rules && \
-          mkdir /etc/snort/rules/iplists  && \
-          mkdir /etc/snort/preproc_rules && \
-          mkdir /usr/local/lib/snort_dynamicrules && \
-          mkdir /etc/snort/so_rules && \
+          mkdir -p /etc/snort && \
+          mkdir -p /etc/snort/rules && \
+          mkdir -p /etc/snort/rules/iplists  && \
+          mkdir -p /etc/snort/preproc_rules && \
+          mkdir -p /usr/local/lib/snort_dynamicrules && \
+          mkdir -p /etc/snort/so_rules && \
           touch /etc/snort/rules/iplists/black_list.rules && \
           touch /etc/snort/rules/iplists/white_list.rules && \
           touch /etc/snort/rules/local.rules && \
           touch /etc/snort/sid-msg.map && \
-          mkdir /var/log/snort && \
-          mkdir /var/log/snort/archived_logs && \
+          mkdir -p /var/log/snort && \
+          mkdir -p /var/log/snort/archived_logs && \
           chmod -R 5775 /etc/snort && \
           chmod -R 5775 /var/log/snort && \
           chmod -R 5775 /var/log/snort/archived_logs && \
