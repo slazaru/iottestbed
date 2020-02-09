@@ -15,10 +15,21 @@ describe_exe = 'python3 /reports/flaskapp/describe.py'
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+
+templates = Jinja2Templates(directory="templates")
+
+
+
+@app.route("/")
+async def homepage(request):
+    return templates.TemplateResponse('index.html', {'request': request})
+
+
+@app.get("/items/{id}")
+async def read_item(request: Request, id: str):
+    return templates.TemplateResponse("item.html", {"request": request, "id": id})
 
 
 """
@@ -51,3 +62,5 @@ def run_describe(jobid):
 	c = os.popen(cl).read()
 	logging.debug('describe from config %s, got %s' % (cl,c))
 	return jsonify({"jobid":jobid,"command":cl,"output":c}), 201
+
+
