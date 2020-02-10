@@ -41,7 +41,7 @@ if res.ok:
 	print res.json()
 """
 
-@app.route('/api/attack/<int:jobid>/', methods=['GET', 'POST'])
+@app.route('/app/attack/<int:jobid>/', methods=['GET', 'POST'])
 def run_attack(jobid):
 	config = request.get_json()
 	cll = [attack_exe,]
@@ -52,7 +52,7 @@ def run_attack(jobid):
 	logging.debug('attack from config %s, got %s' % (cl,c))
 	return jsonify({"jobid":jobid,"command":cl,"output":c}), 201
 
-@app.route('/api/describe/<int:jobid>/', methods=['GET', 'POST'])
+@app.route('/app/describe/<int:jobid>/', methods=['GET', 'POST'])
 def run_describe(jobid):
 	config = request.get_json()
 	cll = [describe_exe,]
@@ -63,4 +63,9 @@ def run_describe(jobid):
 	logging.debug('describe from config %s, got %s' % (cl,c))
 	return jsonify({"jobid":jobid,"command":cl,"output":c}), 201
 
-
+@app.route('/app/snort', methods=['GET', 'POST'])
+def run_snort(request):
+	return templates.TemplateResponse('snortrun.html', {'request': request})
+@app.route('/app/zeek', methods=['GET', 'POST'])
+def run_zeek(request):
+	return templates.TemplateResponse('zeekrun.html', {'request': request})

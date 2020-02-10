@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IoT testbed</title>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="/static/bootstrap.min.css" rel="stylesheet" media="screen">
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+	  
+	<nav class="navbar navbar-inverse">
+	  <div class="container-fluid">
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="index.html">IoT Testbed</a>
+		</div>
+		<div class="collapse navbar-collapse" id="myNavbar">
+		  <ul class="nav navbar-nav">
+			<li><a class="nav-item nav-link"  href="https://github.com/slazaru/iottestbed">Project Home</a></li>
+			<li><a class="nav-item nav-link"  href="/app/zeek">Run Zeek</a></li>
+			<li><a class="nav-item nav-link"  href="/app/snort">Run Snort</a></li>
+			<li><a class="nav-item nav-link"  href="/app/attack">Attack IoT device</a></li>
+			<li><a class="nav-item nav-link"  href="/reports">Reports</a></li>
+		  </ul>
+		</div>
+	  </div>
+	</nav>
+	  
+	<div class="container-fluid">
+		  <h2>Resources</h2>
+		  <br>
+		  {% block content %}{% endblock %}
+	</div>
+	<footer class="footer mt-auto py-3">
+	  <div class="container">
+		<span class="text-muted">
+			  <h4>IoT test bed for safely scanning and dissecting device activity<br>
+			  Fork or clone me on <a href="https://github.com/slazaru/iottestbed">github</a></h4>
+		</span>
+	  </div>
+	</footer>
+
+</body>
+</html>
+
