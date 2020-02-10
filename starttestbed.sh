@@ -175,7 +175,6 @@ service_start () {
     echo -e "[+] Starting the docker container with name ${GREEN}$DOCKER_NAME${NC}"
     docker run -dt --name $DOCKER_NAME --net=bridge -p 54444:54444 -e TZ=`cat /etc/timezone` --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$PATHSCRIPT"/hostapd.conf:/etc/hostapd/hostapd.conf -v "$PATHSCRIPT"/dnsmasq.conf:/etc/dnsmasq.conf $DOCKER_IMAGE > /dev/null 2>&1
     pid=$(docker inspect -f '{{.State.Pid}}' $DOCKER_NAME)
-    
     # Assign phy wireless interface to the container 
     mkdir -p /var/run/netns
     ln -s /proc/"$pid"/ns/net /var/run/netns/"$pid"
@@ -203,7 +202,7 @@ service_start () {
     docker exec "$DOCKER_NAME" /opt/zeek/bin/zeekctl deploy >/dev/null 2>&1
 
     ### start snort server
-    echo "[+] Starting snort web server .. This may take some time to start up on first run .."
+    echo "[+] Starting snort web server .. "
     docker exec "$DOCKER_NAME" entrypoint.sh >/dev/null 2>&1 &
 }
 

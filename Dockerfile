@@ -275,9 +275,12 @@ EXPOSE 8080
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY entrypoint.sh /usr/local/bin 
 COPY entrypoint.sh /
+RUN cd /root/secur_IOT && git pull
+COPY /yooseebootup.pcap /
 
 ENTRYPOINT /etc/init.d/ssh restart && \
  service nginx restart && \
  tcpdump -i $(cat /root/device) -G 300 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
  service cron restart && \
+ generate.py && \
  /bin/bash
