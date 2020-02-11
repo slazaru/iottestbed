@@ -26,7 +26,7 @@ WORKDIR /install
 # Install runtime dependencies
 RUN apt-get update -y && apt-get install -y \
     libpcre3-dev libdumbnet-dev bison flex zlib1g-dev liblzma-dev openssl libssl-dev build-essential g++ \
-    libcrypt-ssleay-perl apt-utils\
+    libcrypt-ssleay-perl apt-utils cron\
     libwww-perl \
     liblwp-useragent-determined-perl \
     liblwp-protocol-https-perl \
