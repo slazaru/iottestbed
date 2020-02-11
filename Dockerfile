@@ -275,8 +275,8 @@ EXPOSE 8080
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 COPY entrypoint.sh /usr/local/bin 
 COPY entrypoint.sh /
-RUN cd /root/secur_IOT && git pull
-COPY /yooseebootup.pcap /
+RUN cd /root/secur_IOT && git pull && \
+ cd /root/pcapGrok && git pull
 
 ENTRYPOINT /etc/init.d/ssh restart && \
  service nginx restart && \
