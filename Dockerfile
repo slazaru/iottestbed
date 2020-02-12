@@ -280,7 +280,7 @@ RUN cd /root/secur_IOT && git pull && \
 
 ENTRYPOINT /etc/init.d/ssh restart && \
  service nginx restart && \
- tcpdump -i $(cat /root/device) -G 300 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
+ tcpdump -i $(cat /root/device) -G 60 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
  service cron restart && \
  generate.py && \
  /bin/bash
