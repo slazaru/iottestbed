@@ -119,8 +119,8 @@ RUN  cd /root/secur_IOT && git pull && \
 #
 
 # Default interface, can be overidden at runtime
-ENV INTERFACE=wlp5s0
-RUN echo "export INTERFACE=wlp5s0" >> /root/.bashrc
+#ENV INTERFACE=$(cat /root/device)
+RUN cat /root/device >> /root/.bashrc 
 # pid file location for pulledpork HUP of snort on rule update
 ENV PID_FILE=/var/run/snort_$INTERFACE
 RUN echo "export PID_FILE=/var/run/snort_$INTERFACE" >> /root/.bashrc
