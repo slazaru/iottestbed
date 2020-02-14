@@ -278,9 +278,19 @@ COPY entrypoint.sh /
 RUN cd /root/secur_IOT && git pull && \
  cd /root/pcapGrok && git pull
 
+# FEB14
+RUN pip3 install fastapi && \
+ pip3 install python-multipart && \
+ mkdir -p /captures && \
+ mkdir -p /uploads 
+
+# for testing - last step is update repos
+RUN cd /root/secur_IOT && git pull && \
+ cd /root/pcapGrok && git pull
+
 ENTRYPOINT /etc/init.d/ssh restart && \
  service nginx restart && \
- tcpdump -i $(cat /root/device) -G 60 -w /root/captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
+ tcpdump -i $(cat /root/device) -G 60 -w /captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
  service cron restart && \
  generate.py && \
  /bin/bash
