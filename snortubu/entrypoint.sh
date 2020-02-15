@@ -32,6 +32,8 @@ echo "SNORT (ERROR) - Pulled Pork update failed."
 
 # start websnort
 websnort > websnort.log
+echo "SNORT (INFO) - starting rq worker snortq with -u = $REDIS_URL"
+cd /rq && rq worker snortq -u $REDIS_URL &
 # start snort
 echo "SNORT (INFO) - Starting snort with provided options: $@"
 exec snort -c /etc/snort/snort.conf "$@"

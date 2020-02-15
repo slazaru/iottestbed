@@ -24,7 +24,8 @@ RUN  apt-get install -y git cargo rustc liblz4-dev libnspr4-dev libnss3-dev  && 
 RUN apt-get install -y apt-utils software-properties-common && PATH=/suricata/.cargo/bin:$PATH && \
   add-apt-repository ppa:oisf/suricata-stable && apt update -y && apt install -y suricata jq && suricata-update 
 
+RUN pip3 install rq
 
 ENV DEBIAN_FRONTEND interactive
-
-CMD tail -f /dev/null
+WORKDIR /
+ENTRYPOINT ["sh", "-c","cd /rq && rq worker suricataq -u $REDIS_URL"]

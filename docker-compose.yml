@@ -24,7 +24,9 @@ services:
         ports:
             - 6379:6379
         volumes:
-        - /testbed/redis_data:/redis_data
+        - ./testbed/redis_data:/redis_data
+        - ./testbed/apk_cache:/etc/apk/cache
+        
         #restart: always
 
 
@@ -37,63 +39,93 @@ services:
             - LANG=en_US.UTF-8
             - LANGUAGE=en_US.UTF-8
             - TZ=Australia/Sydney
-            - REDIS_URL=redis://redis_cache
+            - REDIS_URL=redis://redis_cache:6379
             - WIRELESSINTERFACE=$WIRELESSINTERFACE
             - SNORTINTERFACE=$WIRELESSINTERFACE
             - WSSID=$WIRELESS_SSID
             - WPAPASSPHRASE=$WPAPASSPHRASE
-
+            - ./testbed/apk_cache:/etc/apk/cache
         privileged: true
         #tty: true
         volumes: 
-        - /testbed/pcaps:/pcaps
-        - /testbed/filedrop:/filedrop
-        - /testbed/testpcaps:/testpcaps
+        - ./testbed/pcaps:/pcaps
+        - ./testbed/filedrop:/filedrop
+        - ./testbed/testpcaps:/testpcaps
 
         #restart: always
            
     describe:
-        build: ./suricata
+        build: ./describe
+        links:
+          - rredis
         tty: true
         network_mode: bridge
         volumes:
-        - /testbed/pcaps:/pcaps
-        - /testbed/reports:/reports
-        - /testbed/testpcaps:/testpcaps
-        - /testbed/html:/var/www/html
+        - ./testbed/pcaps:/pcaps
+        - ./testbed/reports:/reports
+        - ./testbed/testpcaps:/testpcaps
+        - ./testbed/html:/var/www/html
+        - ./testbed/apt_cache:/var/cache/apt
+        - ./testbed/rq:/rq
         ports:
             - 3000:3000
+            - 9999:9999 # rq-dashboard
         environment:
             - LANG=en_US.UTF-8
             - LANGUAGE=en_US.UTF-8
             - TZ=Australia/Sydney
-            - REDIS_URL=redis://redis_cache
+            - REDIS_URL=redis://rredis:6379
         depends_on:
            - rredis
         #restart: always
 
     suricata:
         build: ./suricata
-        tty: true
         network_mode: bridge
+        links:
+          - rredis
         volumes:
-        - /testbed/pcaps:/pcaps
-        - /testbed/reports:/reports
-        - /testbed/testpcaps:/testpcaps
-        - /testbed/html:/var/www/html
+        - ./testbed/pcaps:/pcaps
+        - ./testbed/reports:/reports
+        - ./testbed/testpcaps:/testpcaps
+        - ./testbed/html:/var/www/html
+        - ./testbed/apt_cache:/var/cache/apt
+        - ./testbed/rq:/rq
         environment:
             - LANG=en_US.UTF-8
             - LANGUAGE=en_US.UTF-8
             - TZ=Australia/Sydney
-            - REDIS_URL=redis://redis_cache
+            - REDIS_URL=redis://rredis:6379 
         depends_on:
            - rredis
         #restart: always
 
+    pentest:
+        build: ./pentest
+        network_mode: bridge
+        links:
+          - rredis
+        volumes:
+        - ./testbed/pcaps:/pcaps
+        - ./testbed/reports:/reports
+        - ./testbed/testpcaps:/testpcaps
+        - ./testbed/html:/var/www/html
+        - ./testbed/apt_cache:/var/cache/apt
+        - ./testbed/rq:/rq
+        environment:
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
+            - REDIS_URL=redis://rredis:6379 
+        depends_on:
+           - rredis
+        #restart: always
 
     snort:
         build: ./snortubu
         network_mode: bridge
+        links:
+          - rredis 
         ports: 
         - 8080:8080
         environment:
@@ -102,35 +134,19 @@ services:
             - LANG=en_US.UTF-8
             - LANGUAGE=en_US.UTF-8
             - TZ=Australia/Sydney
-            - REDIS_URL=redis://redis_cache
+            - REDIS_URL=redis://rredis:6379  
             - OINKCODE=$OINKCODE # put yours in .env
         volumes: 
-        - /testbed/pcaps:/pcaps
-        - /testbed/reports:/reports
-        - /testbed/testpcaps:/testpcaps
+        - ./testbed/pcaps:/pcaps
+        - ./testbed/reports:/reports
+        - ./testbed/testpcaps:/testpcaps
+        - ./testbed/apt_cache:/var/cache/apt
+        - ./testbed/rq:/rq
         depends_on:
             - rredis 
         #restart: always
-        # links:
-        #   - rredis
-
-    pentest:
-        build: ./pentest
-        network_mode: host
-        environment:
-            - LANG=en_US.UTF-8
-            - LANGUAGE=en_US.UTF-8
-            - TZ=Australia/Sydney
-            - REDIS_URL=redis://redis_cache
-        volumes: 
-        - /testbed/pcaps:/pcaps
-        - /testbed/reports:/reports
-        - /testbed/testpcaps:/testpcaps
-        depends_on:
-            - rredis 
-        #restart: always
-        #links:
-        #   - rredis
+        links:
+          - rredis
 
 
 

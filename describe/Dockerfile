@@ -10,7 +10,7 @@ WORKDIR /describe
 ENV DEBIAN_FRONTEND noninteractive
 
 # update image and get some essentials ### && apt-get upgrade
-RUN apt-get update  -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata \
+RUN apt-get update  -y  && apt-get install -y apt-utils locales gnupg2 ca-certificates apt-transport-https wget tzdata libc6 libcurl3-gnutls curl \
 net-tools iputils-ping nano python3 python3-pip graphviz graphviz-dev libgraphviz-dev && locale-gen en_US.UTF-8 && \
 rm -f /etc/localtime && cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' LC_ALL=C.UTF-8 LANG=C.UTF-8
@@ -23,25 +23,29 @@ RUN wget -O- https://download.opensuse.org/repositories/security:zeek/xUbuntu_18
 # may need to change node.cfg nano /opt/zeek/etc/node.cfg docker interface might not be same as default
 
 
-COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY ./app.py /reports/flaskapp/
-copy ./describe.py /reports/flaskapp/
+COPY ./describe.py /reports/flaskapp/
 RUN chmod ug+rx /reports/flaskapp/app.py && chmod ug+rx /reports/flaskapp/describe.py
 
 RUN mkdir -p /usr/share/GeoIP
 
-RUN apt-get install -y git poppler-utils && pip3 install watchdog && pip3 install wordcloud && pip3 install networkx && \
+RUN apt-get install -y git poppler-utils && pip3 install watchdog wordcloud networkx rq rq-dashboard && \
  git clone https://github.com/fubar2/pcapGrok.git  && cd pcapGrok && pip3 install -r requirements.txt && \
  cd /describe && wget http://www.cse.unsw.edu.au/~z3291606/GeoLite2-City.mmdb -O /usr/share/GeoIP/GeoLite2-City.mmdb
  
 # Create and define the container's working directory.
 
 RUN git clone https://github.com/slazaru/secur_IOT.git 
-RUN cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime  && echo "Australia/Sydney" >  /etc/timezone && TZ=Australia/Sydney
 EXPOSE 3000
-WORKDIR /reports/flaskapp
 ENV FLASK_RUN_PORT="3000" FLASK_APP="/reports/flaskapp/app.py" FLASK_RUN_HOST="0.0.0.0"
-#CMD [ "flask", "run"]
-CMD tail -f /dev/null
+
+
+
+
+COPY entrypoint.sh /bin
+RUN chmod ugo+x /bin/entrypoint.sh
+EXPOSE 9999
+
+ENTRYPOINT ["sh","/bin/entrypoint.sh"]
+

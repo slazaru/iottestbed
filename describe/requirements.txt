@@ -9,7 +9,6 @@ Jinja2
 kombu
 MarkupSafe
 pytz
-redis
 vine
 Werkzeug
 services
@@ -17,3 +16,15 @@ pika
 flask
 rq
 parsezeeklogs
+watchdog
+wordcloud
+networkx
+pysnmp
+shodan
+droopescan
+netaddr
+dnspython
+pysnmp
+redis
+wfuzz
+

@@ -150,6 +150,8 @@ RUN apt-get install -y python3 python3-pip nano cron && \
 RUN ldconfig
 
 # Entrypoint script for runtime config and starting snort
-COPY entrypoint.sh /
+COPY entrypoint.sh /bin
 
-ENTRYPOINT ["/bin/bash", "--", "/entrypoint.sh"]
+run pip3 install rq
+
+ENTRYPOINT ["bash", "/bin/entrypoint.sh"]
