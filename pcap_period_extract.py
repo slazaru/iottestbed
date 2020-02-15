@@ -15,6 +15,7 @@ from scapy.all import *
 import bisect
 import pathlib
 import logging
+from subprocess import check_output,Popen, PIPE
 
 logFileName = 'pcap_period_extract.log'
 logging.basicConfig(filename=logFileName,filemode='w')
@@ -30,6 +31,19 @@ class pcapStore():
 		self.pcapsFolder = pcapsFolder
 		self.pcapfnames = []
 		self.pcaptds = []
+
+	def isScapypcap(self,ppath):
+		"""test path to see if can be read
+		"""
+		ok = False
+		try:
+			foo = scapy.utils.PcapReader(ppath)
+			ok = True
+		except:
+			s = str(ppath) + 'is not a valid pcap file'
+			logging.debug(s)
+		
+		return ok
 		
 		
 	def readFolder(self):
@@ -47,13 +61,16 @@ class pcapStore():
 				if len(fs) == 2:
 					fn = fs[1] 
 					ppath = os.path.join(dirName, pfn)
-					fstartdate = fn.split('.')[0] # date
-					try:
-						fsdt = datetime.strptime(fstartdate,FSDTFORMAT)
-						fsdtt = int(time.mktime(fsdt.timetuple()))
-						pcapinfo.append([fsdtt,ppath])
-					except:
-						logging.warning('Found pcap file name %s in path %s - expected %s preceded by an underscore - ignoring' % (pfn,self.pcapsFolder,FSDTFORMAT))
+					if self.isScapypcap(ppath):
+						fstartdate = fn.split('.')[0] # date
+						try:
+							fsdt = datetime.strptime(fstartdate,FSDTFORMAT)
+							fsdtt = int(time.mktime(fsdt.timetuple()))
+							pcapinfo.append([fsdtt,ppath])
+						except:
+							logging.warning('Found pcap file name %s in path %s - expected %s preceded by an underscore - ignoring' % (pfn,self.pcapsFolder,FSDTFORMAT))
+					else:
+						logging.warning('File name %s in path %s is NOT a valid pcap file - ignoring' % (pfn,self.pcapsFolder,FSDTFORMAT))
 		pcapinfo.sort() # files might turn up in any old order in complex archives
 		self.pcapfnames = [x[1] for x in pcapinfo]
 		self.pcaptds = [x[0] for x in pcapinfo]
@@ -78,18 +95,23 @@ class pcapStore():
 		npkt = 0
 		for fnum in range(firstfi, lastfi):
 			rdfname = self.pcapfnames[fnum]
-			pin = rdpcap(rdfname)
-			mint = min([x.time for x in pin])
-			maxt = max([x.time for x in pin])
-			print('file',rdfname,'has min',mint,'max',maxt)
-			pin = [x for x in pin if int(x.time) >= sdtt and int(x.time) <= edtt] # gotta love scapy 
-			if len(pin) > 0:
-				npkt += len(pin)
-				wrpcap(pcapdest, pin, append=True) #appends packets to output file
-				acted = True
-				logging.info('wrote %d packets to %s' % (len(pin),pcapdest))
-			else:
-				logging.debug(('writePeriod got zero packets filtering by start %s end %s on pcap %s ' % (sdtt,edtt,rdfname))
+			try:
+			   lsout=Popen(['lsof',rdfname],stdout=PIPE, shell=False)
+			   check_output(["grep",rdfname], stdin=lsout.stdout, shell=False)
+			   logging.debug('file %s in use so not read' % rdfname)
+			except:
+				pin = rdpcap(rdfname)
+				mint = min([x.time for x in pin])
+				maxt = max([x.time for x in pin])
+				print('file',rdfname,'has min',mint,'max',maxt)
+				pin = [x for x in pin if int(x.time) >= sdtt and int(x.time) <= edtt] # gotta love scapy 
+				if len(pin) > 0:
+					npkt += len(pin)
+					wrpcap(pcapdest, pin, append=True) #appends packets to output file
+					acted = True
+					logging.info('wrote %d packets to %s' % (len(pin),pcapdest))
+				else:
+					logging.debug('writePeriod got zero packets filtering by start %s end %s on pcap %s ' % (sdtt,edtt,rdfname))
 		logging.info('writePeriod filtered %d packets from %d packet files using window %s - %s to %s' % (npkt,lastfi-firstfi+1,startdt,enddt,pcapdest))
 		return acted
 		

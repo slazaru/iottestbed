@@ -12,11 +12,14 @@ true ${SUBNET:=192.168.4.0}
 true ${AP_ADDR:=192.168.4.1}
 true ${SSID:=iot_testbed}
 true ${CHANNEL:=11}
-true ${WPA_PASSPHRASE:=password}
+true ${WPA_PASSPHRASE:=passwordsaregood}
 true ${HW_MODE:=g}
 true ${DRIVER:=nl80211}
 true ${HT_CAPAB:=[HT40-][SHORT-GI-20][SHORT-GI-40]}
 true ${MODE:=host}
+SSID=$WSSID
+WPA_PASSPHRASE=$WPAPASSPHRASE
+INTERFACE=$WIRELESSINTERFACE
 
 # Attach interface to container in guest mode
 if [ "$MODE" == "guest"  ]; then

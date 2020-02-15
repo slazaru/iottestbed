@@ -12,6 +12,7 @@ ctrl_interface=/var/run/hostapd
 wpa=2
 wpa_passphrase=_PASSPHRASE
 wpa_key_mgmt=_WPA_MODE
+multicast_to_unicast=0
 
 #rsn_pairwise=CCMP
 #ieee8021x=1

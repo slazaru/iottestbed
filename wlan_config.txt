@@ -1,6 +1,6 @@
 # Here goes your custom configuration
-SSID="iot_testbed"
-PASSPHRASE="changethispassword"
+SSID="iot_testbed_nuc_compose"
+PASSPHRASE="LAZ0244502445LAZ"
 HW_MODE=g
 CHANNEL=1
-root:changethispasswordplease
+root:LAZ02445

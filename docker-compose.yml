@@ -14,15 +14,15 @@ services:
     rredis:
         image: redis:4.0.5-alpine
         container_name: redis_cache
-        network_mode: "bridge"
+        network_mode: bridge
         environment:
-            - LANG="en_US.UTF-8"
-            - LANGUAGE="en_US.UTF-8"
-            - TZ="Australia/Sydney"
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
         command: ["redis-server", "--appendonly", "yes"]
         hostname: rredis
         ports:
-            - "6379:6379"
+            - 6379:6379
         volumes:
         - /testbed/redis_data:/redis_data
         #restart: always
@@ -30,39 +30,61 @@ services:
 
     wireless: # pcap and wireless interface
         build: ./wireless
-        network_mode: "host"
+        network_mode: host
         environment:
-            - INTERFACE=$WIRELESSINTERFACE #wlp2s0
-            - DEBUG="1"
-            - LANG="en_US.UTF-8"
-            - LANGUAGE="en_US.UTF-8"
-            - TZ="Australia/Sydney"
+            - INTERFACE=$WIRELESSINTERFACE
+            - DEBUG=1
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
             - REDIS_URL=redis://redis_cache
+            - WIRELESSINTERFACE=$WIRELESSINTERFACE
+            - SNORTINTERFACE=$WIRELESSINTERFACE
+            - WSSID=$WIRELESS_SSID
+            - WPAPASSPHRASE=$WPAPASSPHRASE
+
         privileged: true
-        tty: true
+        #tty: true
         volumes: 
         - /testbed/pcaps:/pcaps
         - /testbed/filedrop:/filedrop
         - /testbed/testpcaps:/testpcaps
 
         #restart: always
-        
            
     describe:
-        build: ./describe
+        build: ./suricata
         tty: true
-        network_mode: "bridge"
+        network_mode: bridge
         volumes:
         - /testbed/pcaps:/pcaps
         - /testbed/reports:/reports
         - /testbed/testpcaps:/testpcaps
         - /testbed/html:/var/www/html
         ports:
-            - "3000:3000"
+            - 3000:3000
         environment:
-            - LANG="en_US.UTF-8"
-            - LANGUAGE="en_US.UTF-8"
-            - TZ="Australia/Sydney"
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
+            - REDIS_URL=redis://redis_cache
+        depends_on:
+           - rredis
+        #restart: always
+
+    suricata:
+        build: ./suricata
+        tty: true
+        network_mode: bridge
+        volumes:
+        - /testbed/pcaps:/pcaps
+        - /testbed/reports:/reports
+        - /testbed/testpcaps:/testpcaps
+        - /testbed/html:/var/www/html
+        environment:
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
             - REDIS_URL=redis://redis_cache
         depends_on:
            - rredis
@@ -71,15 +93,15 @@ services:
 
     snort:
         build: ./snortubu
-        network_mode: "bridge"
+        network_mode: bridge
         ports: 
-        - "8080:8080"
+        - 8080:8080
         environment:
             - INTERFACE=$SNORTINTERFACE
-            - HOME_NET="192.168.1.0/8"
-            - LANG="en_US.UTF-8"
-            - LANGUAGE="en_US.UTF-8"
-            - TZ="Australia/Sydney"
+            - HOME_NET=$HOME_NET
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
             - REDIS_URL=redis://redis_cache
             - OINKCODE=$OINKCODE # put yours in .env
         volumes: 
@@ -94,11 +116,11 @@ services:
 
     pentest:
         build: ./pentest
-        network_mode: "host"
+        network_mode: host
         environment:
-            - LANG="en_US.UTF-8"
-            - LANGUAGE="en_US.UTF-8"
-            - TZ="Australia/Sydney"
+            - LANG=en_US.UTF-8
+            - LANGUAGE=en_US.UTF-8
+            - TZ=Australia/Sydney
             - REDIS_URL=redis://redis_cache
         volumes: 
         - /testbed/pcaps:/pcaps
