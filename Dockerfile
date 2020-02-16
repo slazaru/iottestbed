@@ -110,9 +110,6 @@ RUN apt-get install software-properties-common -y && \
  echo "export PATH=/usr/lib/go-1.11/bin:/root/go/bin:${PATH}" >> /root/.bashrc && \
  echo "export GOPATH=/root/go" >> /root/.bashrc
 
-# for testing - last step is update repos
-RUN  cd /root/secur_IOT && git pull && \
- cd /root/pcapGrok && git pull
 
 #
 # SNORT
@@ -273,19 +270,21 @@ EXPOSE 8080
 
 # Clean up APT when done.
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-COPY entrypoint.sh /usr/local/bin 
-COPY entrypoint.sh /
-RUN cd /root/secur_IOT && git pull && \
- cd /root/pcapGrok && git pull
+#COPY entrypoint.sh /usr/local/bin 
+#COPY entrypoint.sh /
 
 # FEB14
 RUN pip3 install fastapi && \
  pip3 install python-multipart && \
+ pip3 install uvicorn && \
  mkdir -p /captures && \
- mkdir -p /uploads 
+ mkdir -p /uploads && \
+ cp /root/secur_IOT/bootstrap.min.css /var/www/html/ && \
+ ln -s /root/secur_IOT/attack.py /usr/local/sbin
 
 # for testing - last step is update repos
-RUN cd /root/secur_IOT && git pull && \
+RUN cd && \
+ cd /root/secur_IOT && git pull && \
  cd /root/pcapGrok && git pull
 
 ENTRYPOINT /etc/init.d/ssh restart && \

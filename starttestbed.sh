@@ -173,7 +173,7 @@ init () {
 service_start () { 
     IFACE="$1"
     echo -e "[+] Starting the docker container with name ${GREEN}$DOCKER_NAME${NC}"
-    docker run -dt --name $DOCKER_NAME --net=bridge -p 54444:54444 -e TZ=`cat /etc/timezone` --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$PATHSCRIPT"/hostapd.conf:/etc/hostapd/hostapd.conf -v "$PATHSCRIPT"/dnsmasq.conf:/etc/dnsmasq.conf $DOCKER_IMAGE > /dev/null 2>&1
+    docker run -dt --name $DOCKER_NAME --net=bridge -p 54444:54444 -e TZ=`cat /etc/timezone` --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$PATHSCRIPT"/testbed/reports:/var/www/html -v "$PATHSCRIPT"/testbed/captures:/captures -v "$PATHSCRIPT"/testbed/uploads:/uploads -v "$PATHSCRIPT"/hostapd.conf:/etc/hostapd/hostapd.conf -v "$PATHSCRIPT"/dnsmasq.conf:/etc/dnsmasq.conf $DOCKER_IMAGE > /dev/null 2>&1
     pid=$(docker inspect -f '{{.State.Pid}}' $DOCKER_NAME)
     # Assign phy wireless interface to the container 
     mkdir -p /var/run/netns
@@ -204,6 +204,11 @@ service_start () {
     ### start snort server
     echo "[+] Starting snort web server .. "
     docker exec "$DOCKER_NAME" entrypoint.sh >/dev/null 2>&1 &
+
+    ### start backend api
+    echo "[+] Starting backend api .. "
+    docker exec "$DOCKER_NAME" python3 /root/secur_IOT/api/main.py > /dev/null 2>&1 &
+
 }
 
 service_stop () { 
