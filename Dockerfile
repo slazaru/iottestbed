@@ -156,7 +156,6 @@ RUN  wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz \
     && tar zxf LuaJIT-2.0.5.tar.gz \
     && cd LuaJIT-2.0.5 \
     && make -j3 && make install \
-    # && ldconfig \
     && ln -s /usr/local/include/luajit-2.0/* /usr/local/include/
     
 RUN locale-gen en_US.UTF-8 && \
@@ -230,6 +229,7 @@ RUN wget https://github.com/shirkdog/pulledpork/archive/master.tar.gz -O pulledp
 
 # Copy configure pulledpork.conf and snort. 
 # this is lame but known to work in at least one of far too many trials.
+RUN cd
 COPY /files/pulledpork.conf /etc/snort/pulledpork.conf
 COPY /files/snort.conf /etc/snort/snort.conf
 
@@ -305,9 +305,11 @@ RUN cd && \
  cd /root/secur_IOT && git pull && \
  cd /root/pcapGrok && git pull
 
+COPY /files/snort.conf /etc/snort/snort.conf
+
 ENTRYPOINT /etc/init.d/ssh restart && \
  service nginx restart && \
- tcpdump -i $(cat /root/device) -G 60 -w /captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
+ #tcpdump -i $(cat /root/device) $(cat /root/filter) -G 60 -w /captures/capture_%Y-%m-%d-%H:%M:%S.pcap && \
  service cron restart && \
  generate.py && \
  /bin/bash

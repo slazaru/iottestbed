@@ -5,4 +5,6 @@ dnsmasq.conf
 hostapd.conf
 *.pcap
 wlan_config.txt
-/testbed
+testbed/uploads
+testbed/reports
+testbed/captures

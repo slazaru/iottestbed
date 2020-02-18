@@ -58,7 +58,7 @@ if [ "$UID" -ne "$ROOT_UID" ] ; then
 fi
 
 # Argument check
-if [ "$#" -eq 0 ] || [ "$#" -gt 2 ] 
+if [ "$#" -eq 0 ] || [ "$#" -gt 3 ] 
 then
     show_usage
 fi
@@ -170,10 +170,11 @@ init () {
     sed -e "s/_DNS_SERVER/$DNS_SERVER/g" -e "s/_IFACE/$IFACE/" -e "s/_SUBNET_FIRST/$SUBNET.20/g" -e "s/_SUBNET_END/$SUBNET.254/g" "$PATHSCRIPT"/templates/dnsmasq.template > "$PATHSCRIPT"/dnsmasq.conf
 }
 
-service_start () { 
+service_start () {
+
     IFACE="$1"
     echo -e "[+] Starting the docker container with name ${GREEN}$DOCKER_NAME${NC}"
-    docker run -dt --name $DOCKER_NAME --net=bridge -p 54444:54444 -e TZ=`cat /etc/timezone` --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$PATHSCRIPT"/testbed/reports:/var/www/html -v "$PATHSCRIPT"/testbed/captures:/captures -v "$PATHSCRIPT"/testbed/uploads:/uploads -v "$PATHSCRIPT"/hostapd.conf:/etc/hostapd/hostapd.conf -v "$PATHSCRIPT"/dnsmasq.conf:/etc/dnsmasq.conf $DOCKER_IMAGE > /dev/null 2>&1
+    docker run -dt --name $DOCKER_NAME --net=bridge -p 54444:54444 -e TZ=`cat /etc/timezone` --cap-add=NET_ADMIN --cap-add=NET_RAW -v "$PATHSCRIPT"/testbed/testpcaps:/testpcaps -v "$PATHSCRIPT"/testbed/reports:/var/www/html -v "$PATHSCRIPT"/testbed/captures:/captures -v "$PATHSCRIPT"/testbed/uploads:/uploads -v "$PATHSCRIPT"/hostapd.conf:/etc/hostapd/hostapd.conf -v "$PATHSCRIPT"/dnsmasq.conf:/etc/dnsmasq.conf $DOCKER_IMAGE > /dev/null 2>&1
     pid=$(docker inspect -f '{{.State.Pid}}' $DOCKER_NAME)
     # Assign phy wireless interface to the container 
     mkdir -p /var/run/netns
@@ -197,13 +198,18 @@ service_start () {
     echo -e "[+] Starting ${GREEN}hostapd${NC} and ${GREEN}dnsmasq${NC} in the docker container ${GREEN}$DOCKER_NAME${NC}"
     docker exec "$DOCKER_NAME" start_ap
 
+    ### start tcpdump
+    # add MAC-based filtering if argument was supplied
+    echo "[+] Starting packet capture .."
+    docker exec "$DOCKER_NAME" tcpdump -i "$IFACE" "$FILTER" -G 60 -w /captures/capture_%Y-%m-%d-%H:%M:%S.pcap >/dev/null 2>&1 &
+
     ### start zeek
     echo "[+] Starting zeek .."
     docker exec "$DOCKER_NAME" /opt/zeek/bin/zeekctl deploy >/dev/null 2>&1
 
     ### start snort server
     echo "[+] Starting snort web server .. "
-    docker exec "$DOCKER_NAME" entrypoint.sh >/dev/null 2>&1 &
+    docker exec "$DOCKER_NAME" sh /entrypoint.sh >/dev/null 2>&1 &
 
     ### start backend api
     echo "[+] Starting backend api .. "
@@ -240,8 +246,17 @@ then
         exit 1
     fi
     IFACE=${2}
+    if [ ! -z "$3" ]
+    then
+        echo " got mac"
+        FILTER="ether host not ${3}"
+    else
+        echo "didnt get mac"
+        FILTER=""
+    fi
+    MACADDR=${3}
     service_stop "$IFACE"
-    clear    
+    clear
     print_banner
     init "$IFACE"
     service_start "$IFACE"
