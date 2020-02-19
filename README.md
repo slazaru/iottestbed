@@ -7,9 +7,9 @@ This script was built using https://github.com/fgg89/docker-ap as a starting poi
 
 ## Features
 
-### Pcap analysis 
+#### Pcap analysis 
 
-### Network attack script
+#### Network attack script
 
 ## Setup instructions
 
@@ -23,7 +23,7 @@ Run starttestbed.sh as sudo, specifying the wireless interface on your machine, 
 
 Broadly speaking, there are two ways to use the testbed. You can run everything manually using ssh, or you can use the web interface.
 
-### ssh
+#### ssh
 
 Get the address the container is running on by using docker inspect, eg:
 
@@ -33,7 +33,7 @@ Then ssh as root using port 54444, eg:
 
 `ssh root@172.17.0.2 -p 54444`
 
-### web interface
+#### web interface
 
 To enable the web command interface, local ssh port forwarding is required. Just add -L localhost:8000:localhost:8000 to the ssh command, eg:
 
