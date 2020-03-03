@@ -1,5 +1,6 @@
-## Credit for previous work
-This script was built using https://github.com/fgg89/docker-ap as a starting point
+## Example Results
+
+As of the time of writing, some example reports generated using this testbed can be viewed at http://www.cse.unsw.edu.au/~z3291606/ 
 
 ## Requirements
 1. x86 64bit Linux machine with both an ethernet and wireless interface
@@ -81,6 +82,6 @@ Assuming all goes well, eventually reports will be generated and be viewable on 
 
 You can view the device home page by connecting to the iot testbed wireless network, opening a web browser and then navigating to the ip address of the Docker container, which by default should be 192.168.4.1
 
-
-
+## Credit for previous work
+This script was built using https://github.com/fgg89/docker-ap as a starting point
 
